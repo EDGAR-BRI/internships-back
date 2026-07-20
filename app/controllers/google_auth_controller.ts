@@ -2,17 +2,51 @@ import User from '#models/user'
 import type { HttpContext } from '@adonisjs/core/http'
 import env from '#start/env'
 
+function getAllowedOrigins(): string[] {
+  return (env.get('CORS_ORIGINS') || env.get('FRONTEND_URL') || '')
+    .split(',')
+    .map((s) => s.trim().replace(/\/$/, ''))
+    .filter(Boolean)
+}
+
+function resolveCallbackUrl(
+  queryRedirect: string | undefined,
+  defaultOrigin: string
+): string {
+  const fallback = `${defaultOrigin.replace(/\/$/, '')}/auth/callback`
+  if (!queryRedirect) return fallback
+  try {
+    const requested = new URL(queryRedirect)
+    const isAllowed = getAllowedOrigins().some((origin) => {
+      try {
+        return new URL(origin).origin === requested.origin
+      } catch {
+        return false
+      }
+    })
+    if (isAllowed) return requested.toString()
+  } catch {}
+  return fallback
+}
+
 export default class GoogleAuthController {
-  async redirect({ ally }: HttpContext) {
+  async redirect({ ally, request, session }: HttpContext) {
+    const redirectUri = request.qs().redirect_uri
+    if (typeof redirectUri === 'string' && redirectUri) {
+      session.put('post_login_redirect', redirectUri)
+    }
     return ally.use('google').redirect()
   }
 
-  async callback({ ally, response }: HttpContext) {
+  async callback({ ally, response, session }: HttpContext) {
     const provider = ally.use('google')
-    const frontendUrl = env.get('FRONTEND_URL', 'http://localhost:5173')
+    const defaultOrigin = env.get('FRONTEND_URL', 'http://localhost:5173')
+    const storedRedirect = session.get('post_login_redirect') as string | undefined
+    const frontendUrl = resolveCallbackUrl(storedRedirect, defaultOrigin)
+    session.forget('post_login_redirect')
 
     if (provider.hasError()) {
-      return response.redirect(`${frontendUrl}/login?error=${provider.getError()}`)
+      return response.redirect(`${frontendUrl}?error=${provider.getError()}`)
     }
 
     const googleUser = await provider.user()
@@ -48,7 +82,7 @@ export default class GoogleAuthController {
     )
 
     return response.redirect(
-      `${frontendUrl}/dashboard?token=${token.value!.release()}&user=${userData}`
+      `${frontendUrl}?token=${token.value!.release()}&user=${userData}`
     )
   }
 }
