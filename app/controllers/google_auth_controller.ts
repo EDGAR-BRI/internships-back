@@ -30,11 +30,16 @@ function resolveCallbackUrl(
 }
 
 export default class GoogleAuthController {
-  async redirect({ ally, request, session }: HttpContext) {
+  async redirect({ ally, request, session, logger }: HttpContext) {
     const redirectUri = request.qs().redirect_uri
     if (typeof redirectUri === 'string' && redirectUri) {
       session.put('post_login_redirect', redirectUri)
     }
+    const appUrl = env.get('APP_URL')
+    const callbackUrl = `${appUrl.replace(/\/$/, '')}/api/v1/auth/google/callback`
+    logger.info(
+      `Google OAuth start | APP_URL="${appUrl}" | callback="${callbackUrl}" | frontend_redirect_uri="${redirectUri ?? 'none'}"`
+    )
     return ally.use('google').redirect()
   }
 
