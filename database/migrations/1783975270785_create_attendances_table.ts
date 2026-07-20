@@ -4,7 +4,7 @@ export default class extends BaseSchema {
   protected tableName = 'attendances'
 
   async up() {
-    this.schema.createTable(this.tableName, (table) => {
+    this.schema.createTableIfNotExists(this.tableName, (table) => {
       table.increments('id')
       table
         .integer('user_id')
