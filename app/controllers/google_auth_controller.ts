@@ -78,16 +78,16 @@ export default class GoogleAuthController {
 
     const token = await User.accessTokens.create(user)
 
-    const userData = encodeURIComponent(
-      JSON.stringify({
+    const params = new URLSearchParams({
+      token: token.value!.release(),
+      user: JSON.stringify({
         id: user.id,
         fullName: user.fullName,
         email: user.email,
-      })
-    )
+      }),
+    })
 
-    return response.redirect(
-      `${frontendUrl}?token=${token.value!.release()}&user=${userData}`
-    )
+    return response.redirect(`${frontendUrl}/auth/callback?${params.toString()}`, false)
   }
+}
 }
