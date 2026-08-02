@@ -6,6 +6,8 @@ import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import type { HasMany } from '@adonisjs/lucid/types/relations'
 import type { HashManager } from '@adonisjs/core/hash'
 import Attendance from '#models/attendance'
+import LogEntry from '#models/log_entry'
+import Note from '#models/note'
 
 const AuthFinder = withAuthFinder(hash as unknown as HashManager<any>, {
   uids: ['email'],
@@ -51,4 +53,10 @@ export default class User extends AuthFinder(BaseModel) {
 
   @hasMany(() => Attendance)
   declare attendances: HasMany<typeof Attendance>
+
+  @hasMany(() => LogEntry)
+  declare logEntries: HasMany<typeof LogEntry>
+
+  @hasMany(() => Note)
+  declare notes: HasMany<typeof Note>
 }

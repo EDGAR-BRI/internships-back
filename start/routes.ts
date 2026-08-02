@@ -50,6 +50,18 @@ router
 
     router
       .group(() => {
+        router.get('/', [controllers.Notes, 'index'])
+        router.post('/', [controllers.Notes, 'store'])
+        router.get(':id', [controllers.Notes, 'show'])
+        router.put(':id', [controllers.Notes, 'update'])
+        router.delete(':id', [controllers.Notes, 'destroy'])
+      })
+      .prefix('notes')
+      .as('notes')
+      .use(middleware.auth())
+
+    router
+      .group(() => {
         router.get('/', [controllers.Attendances, 'index'])
         router.post('check-in', [controllers.Attendances, 'checkIn'])
         router.post('check-out', [controllers.Attendances, 'checkOut'])
