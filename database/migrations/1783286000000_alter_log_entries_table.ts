@@ -4,42 +4,36 @@ export default class extends BaseSchema {
   protected tableName = 'log_entries'
 
   async up() {
-    await this.db.rawQuery(`
-      ALTER TABLE ${this.tableName}
-        DROP COLUMN IF EXISTS title,
-        DROP COLUMN IF EXISTS description,
-        DROP COLUMN IF EXISTS priority,
-        DROP COLUMN IF EXISTS due_date
-    `)
+    this.schema.alterTable(this.tableName, (table) => table.dropColumn('title'))
+    this.schema.alterTable(this.tableName, (table) => table.dropColumn('description'))
+    this.schema.alterTable(this.tableName, (table) => table.dropColumn('priority'))
+    this.schema.alterTable(this.tableName, (table) => table.dropColumn('due_date'))
 
-    await this.db.rawQuery(`
-      ALTER TABLE ${this.tableName}
-        ADD COLUMN IF NOT EXISTS name varchar(255) NOT NULL,
-        ADD COLUMN IF NOT EXISTS theory text NULL,
-        ADD COLUMN IF NOT EXISTS attitudes text NULL,
-        ADD COLUMN IF NOT EXISTS resources text NULL,
-        ADD COLUMN IF NOT EXISTS dat_start timestamptz NOT NULL,
-        ADD COLUMN IF NOT EXISTS dat_end timestamptz NULL
-    `)
+    this.schema.alterTable(this.tableName, (table) =>
+      table.string('name', 255).notNullable().defaultTo('')
+    )
+    this.schema.alterTable(this.tableName, (table) => table.text('theory').nullable())
+    this.schema.alterTable(this.tableName, (table) => table.text('attitudes').nullable())
+    this.schema.alterTable(this.tableName, (table) => table.text('resources').nullable())
+    this.schema.alterTable(this.tableName, (table) => table.timestamp('dat_start').notNullable())
+    this.schema.alterTable(this.tableName, (table) => table.timestamp('dat_end').nullable())
   }
 
   async down() {
-    await this.db.rawQuery(`
-      ALTER TABLE ${this.tableName}
-        DROP COLUMN IF EXISTS name,
-        DROP COLUMN IF EXISTS theory,
-        DROP COLUMN IF EXISTS attitudes,
-        DROP COLUMN IF EXISTS resources,
-        DROP COLUMN IF EXISTS dat_start,
-        DROP COLUMN IF EXISTS dat_end
-    `)
+    this.schema.alterTable(this.tableName, (table) => table.dropColumn('name'))
+    this.schema.alterTable(this.tableName, (table) => table.dropColumn('theory'))
+    this.schema.alterTable(this.tableName, (table) => table.dropColumn('attitudes'))
+    this.schema.alterTable(this.tableName, (table) => table.dropColumn('resources'))
+    this.schema.alterTable(this.tableName, (table) => table.dropColumn('dat_start'))
+    this.schema.alterTable(this.tableName, (table) => table.dropColumn('dat_end'))
 
-    await this.db.rawQuery(`
-      ALTER TABLE ${this.tableName}
-        ADD COLUMN IF NOT EXISTS title varchar(255) NOT NULL,
-        ADD COLUMN IF NOT EXISTS description text NULL,
-        ADD COLUMN IF NOT EXISTS priority varchar(255) NOT NULL DEFAULT 'medium',
-        ADD COLUMN IF NOT EXISTS due_date date NULL
-    `)
+    this.schema.alterTable(this.tableName, (table) =>
+      table.string('title', 255).notNullable().defaultTo('')
+    )
+    this.schema.alterTable(this.tableName, (table) => table.text('description').nullable())
+    this.schema.alterTable(this.tableName, (table) =>
+      table.string('priority', 255).notNullable().defaultTo('medium')
+    )
+    this.schema.alterTable(this.tableName, (table) => table.date('due_date').nullable())
   }
 }
