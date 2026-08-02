@@ -15,6 +15,27 @@ router.get('/', () => {
   return { hello: 'world' }
 })
 
+router.get('/debug-env', async ({ response }) => {
+  const env = await import('#start/env')
+  return {
+    processEnv: {
+      FRONTEND_URL: process.env.FRONTEND_URL || null,
+      CORS_ORIGINS: process.env.CORS_ORIGINS || null,
+      APP_URL: process.env.APP_URL || null,
+      NODE_ENV: process.env.NODE_ENV || null,
+    },
+    adonisEnv: {
+      FRONTEND_URL: env.default.get('FRONTEND_URL') || null,
+      CORS_ORIGINS: env.default.get('CORS_ORIGINS') || null,
+      APP_URL: env.default.get('APP_URL') || null,
+    },
+    allowedOrigins: (process.env.CORS_ORIGINS || process.env.FRONTEND_URL || '')
+      .split(',')
+      .map((s: string) => s.trim().replace(/\/$/, ''))
+      .filter(Boolean),
+  }
+})
+
 router
   .group(() => {
     router
