@@ -77,5 +77,11 @@
       "./app/middleware/*.ts"
     ]
   },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@swc/core",
+      "better-sqlite3"
+    ]
+  },
   "prettier": "@adonisjs/prettier-config"
 }
