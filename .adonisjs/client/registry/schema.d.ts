@@ -223,6 +223,30 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/notes_controller').default['destroy']>>>
     }
   }
+  'admin.admin_users.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/admin/users'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin_users_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin_users_controller').default['index']>>>
+    }
+  }
+  'admin.admin_users.summary': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/admin/summary'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin_users_controller').default['summary']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin_users_controller').default['summary']>>>
+    }
+  }
   'attendances.attendances.index': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/attendances'

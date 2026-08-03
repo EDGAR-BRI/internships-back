@@ -46,6 +46,12 @@ export interface ApiDefinition {
       destroy: typeof routes['notes.notes.destroy']
     }
   }
+  admin: {
+    adminUsers: {
+      index: typeof routes['admin.admin_users.index']
+      summary: typeof routes['admin.admin_users.summary']
+    }
+  }
   attendances: {
     attendances: {
       index: typeof routes['attendances.attendances.index']

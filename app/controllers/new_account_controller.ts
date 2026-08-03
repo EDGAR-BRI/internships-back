@@ -7,7 +7,10 @@ export default class NewAccountController {
   async store({ request, serialize }: HttpContext) {
     const { fullName, email, password } = await request.validateUsing(signupValidator)
 
-    const user = await User.create({ fullName, email, password })
+    const userCount = await User.query().count('* as total').first()
+    const role = userCount && Number(userCount.$extras.total) === 0 ? 'admin' : 'user'
+
+    const user = await User.create({ fullName, email, password, role })
     const token = await User.accessTokens.create(user)
 
     return serialize({

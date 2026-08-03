@@ -92,6 +92,16 @@ router
 
     router
       .group(() => {
+        router.get('users', [controllers.AdminUsers, 'index'])
+        router.get('summary', [controllers.AdminUsers, 'summary'])
+      })
+      .prefix('admin')
+      .as('admin')
+      .use(middleware.auth())
+      .use(middleware.admin())
+
+    router
+      .group(() => {
         router.get('/', [controllers.Attendances, 'index'])
         router.get('summary', [controllers.Attendances, 'summary'])
         router.post('check-in', [controllers.Attendances, 'checkIn'])

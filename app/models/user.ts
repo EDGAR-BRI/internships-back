@@ -28,6 +28,9 @@ export default class User extends AuthFinder(BaseModel) {
   @column()
   declare email: string
 
+  @column()
+  declare role: string
+
   @column({ serializeAs: null })
   declare provider: string | null
 
@@ -50,6 +53,11 @@ export default class User extends AuthFinder(BaseModel) {
       return `${first.charAt(0)}${last.charAt(0)}`.toUpperCase()
     }
     return first.slice(0, 2).toUpperCase()
+  }
+
+  @computed()
+  get isAdmin() {
+    return this.role === 'admin'
   }
 
   @hasMany(() => Attendance)

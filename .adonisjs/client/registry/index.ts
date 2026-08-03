@@ -114,6 +114,18 @@ const routes = {
     tokens: [{"old":"/api/v1/notes/:id","type":0,"val":"api","end":""},{"old":"/api/v1/notes/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/notes/:id","type":0,"val":"notes","end":""},{"old":"/api/v1/notes/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['notes.notes.destroy']['types'],
   },
+  'admin.admin_users.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/admin/users',
+    tokens: [{"old":"/api/v1/admin/users","type":0,"val":"api","end":""},{"old":"/api/v1/admin/users","type":0,"val":"v1","end":""},{"old":"/api/v1/admin/users","type":0,"val":"admin","end":""},{"old":"/api/v1/admin/users","type":0,"val":"users","end":""}],
+    types: placeholder as Registry['admin.admin_users.index']['types'],
+  },
+  'admin.admin_users.summary': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/admin/summary',
+    tokens: [{"old":"/api/v1/admin/summary","type":0,"val":"api","end":""},{"old":"/api/v1/admin/summary","type":0,"val":"v1","end":""},{"old":"/api/v1/admin/summary","type":0,"val":"admin","end":""},{"old":"/api/v1/admin/summary","type":0,"val":"summary","end":""}],
+    types: placeholder as Registry['admin.admin_users.summary']['types'],
+  },
   'attendances.attendances.index': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/attendances',
