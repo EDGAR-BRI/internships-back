@@ -68,7 +68,7 @@ export default class AttendanceProgressService {
     let targetEndDate: string | null = null
     if (settings?.startDate) {
       targetEndDate = this.computeTargetEndDate(
-        settings.startDate.setZone(this.TIMEZONE),
+        settings.startDate,
         settings.skippedWeeks ?? [],
         totalDays
       )
@@ -79,7 +79,7 @@ export default class AttendanceProgressService {
 
     if (settings?.startDate && attendances.length > 0) {
       const now = DateTime.now().setZone(this.TIMEZONE)
-      const start = settings.startDate.setZone(this.TIMEZONE)
+      const start = settings.startDate
       const weeksElapsed = Math.max(now.diff(start, 'weeks').weeks, 0.001)
       pace.daysPerWeek = completedDays / weeksElapsed
       pace.hoursPerWeek = completedHours / weeksElapsed
