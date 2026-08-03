@@ -59,6 +59,15 @@ router
 
     router
       .group(() => {
+        router.get('/', [controllers.Settings, 'show'])
+        router.put('/', [controllers.Settings, 'update'])
+      })
+      .prefix('account/settings')
+      .as('settings')
+      .use(middleware.auth())
+
+    router
+      .group(() => {
         router.get('/', [controllers.LogEntries, 'index'])
         router.post('/', [controllers.LogEntries, 'store'])
         router.get(':id', [controllers.LogEntries, 'show'])
