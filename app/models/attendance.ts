@@ -25,6 +25,9 @@ export default class Attendance extends BaseModel {
   @column()
   declare hours: number | null
 
+  @column()
+  declare mode: 'on_site' | 'remote' | null
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 

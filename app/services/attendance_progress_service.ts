@@ -3,7 +3,7 @@ import UserSetting from '#models/user_setting'
 import { DateTime } from 'luxon'
 
 export default class AttendanceProgressService {
-  static TOTAL_DAYS = 45
+  static TOTAL_HOURS = 360
   static DEFAULT_HOURS_PER_DAY = 8
   static TIMEZONE = 'America/Mexico_City'
 
@@ -11,8 +11,12 @@ export default class AttendanceProgressService {
     return settings?.workHoursPerDay ?? this.DEFAULT_HOURS_PER_DAY
   }
 
-  static getTotalHours(settings: UserSetting | null): number {
-    return this.TOTAL_DAYS * this.getWorkHoursPerDay(settings)
+  static getTotalDays(settings: UserSetting | null): number {
+    return this.TOTAL_HOURS / this.getWorkHoursPerDay(settings)
+  }
+
+  static getTotalHours(_settings: UserSetting | null): number {
+    return this.TOTAL_HOURS
   }
 
   static computeDayHours(attendance: Attendance, settings: UserSetting | null): number {
@@ -29,6 +33,7 @@ export default class AttendanceProgressService {
 
   static countCompletedDay(attendance: Attendance): number {
     if (attendance.isFullDay && attendance.checkOut) return 1
+    if (attendance.hours !== null && attendance.hours !== undefined && attendance.hours > 0) return 1
     return 0
   }
 
@@ -36,24 +41,36 @@ export default class AttendanceProgressService {
     const settings = await UserSetting.query().where('userId', userId).first()
     const attendances = await Attendance.query().where('user_id', userId).orderBy('date', 'asc')
 
+    const totalDays = this.getTotalDays(settings)
     const totalHours = this.getTotalHours(settings)
     const fullDayHours = this.getWorkHoursPerDay(settings)
 
     let completedDays = 0
     let completedHours = 0
+    let onSiteDays = 0
+    let remoteDays = 0
     for (const a of attendances) {
       completedDays += this.countCompletedDay(a)
       completedHours += this.computeDayHours(a, settings)
+      if (this.countCompletedDay(a) === 1) {
+        if (a.mode === 'remote') {
+          remoteDays++
+        } else {
+          onSiteDays++
+        }
+      }
     }
 
-    const remainingDays = Math.max(this.TOTAL_DAYS - completedDays, 0)
+    const totalDaysCeil = Math.ceil(totalDays)
+    const remainingDays = Math.max(totalDaysCeil - completedDays, 0)
     const remainingHours = Math.max(totalHours - completedHours, 0)
 
     let targetEndDate: string | null = null
     if (settings?.startDate) {
       targetEndDate = this.computeTargetEndDate(
         settings.startDate.setZone(this.TIMEZONE),
-        settings.skippedWeeks ?? []
+        settings.skippedWeeks ?? [],
+        totalDays
       )
     }
 
@@ -80,13 +97,15 @@ export default class AttendanceProgressService {
     }
 
     return {
-      totalDays: this.TOTAL_DAYS,
+      totalDays: Math.round(totalDays * 10) / 10,
       totalHours,
       fullDayHours,
       completedDays,
       completedHours: Math.round(completedHours * 10) / 10,
       remainingDays,
       remainingHours: Math.round(remainingHours * 10) / 10,
+      onSiteDays,
+      remoteDays,
       targetEndDate,
       estimatedEndDate,
       pace: {
@@ -96,13 +115,13 @@ export default class AttendanceProgressService {
     }
   }
 
-  static computeTargetEndDate(startDate: DateTime, skippedWeeks: number[]): string {
+  static computeTargetEndDate(startDate: DateTime, skippedWeeks: number[], totalDays: number): string {
     const start = startDate.startOf('day')
     let businessDaysCounted = 0
     let current = start
     const skippedSet = new Set(skippedWeeks)
 
-    while (businessDaysCounted < this.TOTAL_DAYS) {
+    while (businessDaysCounted < totalDays) {
       const weekday = current.weekday // Luxon ISO: 1=Mon ... 7=Sun
       const isWeekend = weekday === 6 || weekday === 7
       const rawWeek = this.computeRawWeekNumber(start, current)
@@ -112,7 +131,7 @@ export default class AttendanceProgressService {
         businessDaysCounted++
       }
 
-      if (businessDaysCounted < this.TOTAL_DAYS) {
+      if (businessDaysCounted < totalDays) {
         current = current.plus({ days: 1 })
       }
     }

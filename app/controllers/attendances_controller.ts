@@ -30,7 +30,7 @@ export default class AttendancesController {
 
   async checkIn({ auth, request, serialize }: HttpContext) {
     const user = auth.getUserOrFail()
-    const { date, isFullDay } = await request.validateUsing(checkInValidator)
+    const { date, isFullDay, mode } = await request.validateUsing(checkInValidator)
     const dateObj = DateTime.fromISO(date, { zone: 'America/Mexico_City' }).startOf('day')
     const dateStr = dateObj.toSQLDate()!
 
@@ -47,6 +47,7 @@ export default class AttendancesController {
 
     attendance.checkIn = DateTime.now()
     attendance.isFullDay = isFullDay ?? null
+    attendance.mode = mode ?? null
     await attendance.save()
 
     const settings = await UserSetting.query().where('userId', user.id).first()
@@ -80,7 +81,7 @@ export default class AttendancesController {
 
   async fullDay({ auth, request, serialize }: HttpContext) {
     const user = auth.getUserOrFail()
-    const { date } = await request.validateUsing(fullDayValidator)
+    const { date, mode } = await request.validateUsing(fullDayValidator)
     const dateObj = DateTime.fromISO(date, { zone: 'America/Mexico_City' }).startOf('day')
     const dateStr = dateObj.toSQLDate()!
 
@@ -97,6 +98,7 @@ export default class AttendancesController {
 
     attendance.checkOut = DateTime.now()
     attendance.isFullDay = true
+    attendance.mode = mode ?? null
     await attendance.save()
 
     const settings = await UserSetting.query().where('userId', user.id).first()
@@ -109,7 +111,7 @@ export default class AttendancesController {
 
   async partial({ auth, request, serialize }: HttpContext) {
     const user = auth.getUserOrFail()
-    const { date, hours } = await request.validateUsing(partialValidator)
+    const { date, hours, mode } = await request.validateUsing(partialValidator)
     const dateObj = DateTime.fromISO(date, { zone: 'America/Mexico_City' }).startOf('day')
     const dateStr = dateObj.toSQLDate()!
 
@@ -126,6 +128,7 @@ export default class AttendancesController {
 
     attendance.hours = hours
     attendance.isFullDay = false
+    attendance.mode = mode ?? null
     await attendance.save()
 
     const settings = await UserSetting.query().where('userId', user.id).first()
@@ -154,6 +157,9 @@ export default class AttendancesController {
     if (data.hours !== undefined) {
       attendance.hours = data.hours
       attendance.isFullDay = false
+    }
+    if (data.mode !== undefined) {
+      attendance.mode = data.mode
     }
 
     await attendance.save()

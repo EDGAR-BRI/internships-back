@@ -30,3 +30,6 @@ yarn-error.log
 
 # Platform specific
 .DS_Store
+
+# Local dev database
+tmp/db.sqlite3
