@@ -139,7 +139,7 @@ export default class AttendancesController {
     })
   }
 
-  async update({ auth, params, request, serialize }: HttpContext) {
+  async update({ auth, params, request, response, serialize }: HttpContext) {
     const user = auth.getUserOrFail()
     const data = await request.validateUsing(updateAttendanceValidator)
 
@@ -147,6 +147,25 @@ export default class AttendancesController {
       .where('id', params.id)
       .where('user_id', user.id)
       .firstOrFail()
+
+    if (data.date !== undefined) {
+      const newDate = DateTime.fromISO(data.date, { zone: 'America/Mexico_City' }).startOf('day')
+      const newDateStr = newDate.toSQLDate()!
+      const currentDateStr = attendance.date.toSQLDate()!
+
+      if (newDateStr !== currentDateStr) {
+        const existing = await Attendance.query()
+          .where('user_id', user.id)
+          .where('date', newDateStr)
+          .first()
+
+        if (existing) {
+          return response.conflict({ message: 'Ya existe una asistencia para esa fecha' })
+        }
+
+        attendance.date = newDate
+      }
+    }
 
     if (data.isFullDay !== undefined) {
       attendance.isFullDay = data.isFullDay
