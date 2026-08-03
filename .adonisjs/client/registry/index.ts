@@ -42,6 +42,18 @@ const routes = {
     tokens: [{"old":"/api/v1/account/logout","type":0,"val":"api","end":""},{"old":"/api/v1/account/logout","type":0,"val":"v1","end":""},{"old":"/api/v1/account/logout","type":0,"val":"account","end":""},{"old":"/api/v1/account/logout","type":0,"val":"logout","end":""}],
     types: placeholder as Registry['profile.access_tokens.destroy']['types'],
   },
+  'settings.settings.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/account/settings',
+    tokens: [{"old":"/api/v1/account/settings","type":0,"val":"api","end":""},{"old":"/api/v1/account/settings","type":0,"val":"v1","end":""},{"old":"/api/v1/account/settings","type":0,"val":"account","end":""},{"old":"/api/v1/account/settings","type":0,"val":"settings","end":""}],
+    types: placeholder as Registry['settings.settings.show']['types'],
+  },
+  'settings.settings.update': {
+    methods: ["PUT"],
+    pattern: '/api/v1/account/settings',
+    tokens: [{"old":"/api/v1/account/settings","type":0,"val":"api","end":""},{"old":"/api/v1/account/settings","type":0,"val":"v1","end":""},{"old":"/api/v1/account/settings","type":0,"val":"account","end":""},{"old":"/api/v1/account/settings","type":0,"val":"settings","end":""}],
+    types: placeholder as Registry['settings.settings.update']['types'],
+  },
   'logEntries.log_entries.index': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/log-entries',
@@ -108,6 +120,12 @@ const routes = {
     tokens: [{"old":"/api/v1/attendances","type":0,"val":"api","end":""},{"old":"/api/v1/attendances","type":0,"val":"v1","end":""},{"old":"/api/v1/attendances","type":0,"val":"attendances","end":""}],
     types: placeholder as Registry['attendances.attendances.index']['types'],
   },
+  'attendances.attendances.summary': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/attendances/summary',
+    tokens: [{"old":"/api/v1/attendances/summary","type":0,"val":"api","end":""},{"old":"/api/v1/attendances/summary","type":0,"val":"v1","end":""},{"old":"/api/v1/attendances/summary","type":0,"val":"attendances","end":""},{"old":"/api/v1/attendances/summary","type":0,"val":"summary","end":""}],
+    types: placeholder as Registry['attendances.attendances.summary']['types'],
+  },
   'attendances.attendances.check_in': {
     methods: ["POST"],
     pattern: '/api/v1/attendances/check-in',
@@ -119,6 +137,30 @@ const routes = {
     pattern: '/api/v1/attendances/check-out',
     tokens: [{"old":"/api/v1/attendances/check-out","type":0,"val":"api","end":""},{"old":"/api/v1/attendances/check-out","type":0,"val":"v1","end":""},{"old":"/api/v1/attendances/check-out","type":0,"val":"attendances","end":""},{"old":"/api/v1/attendances/check-out","type":0,"val":"check-out","end":""}],
     types: placeholder as Registry['attendances.attendances.check_out']['types'],
+  },
+  'attendances.attendances.full_day': {
+    methods: ["POST"],
+    pattern: '/api/v1/attendances/full-day',
+    tokens: [{"old":"/api/v1/attendances/full-day","type":0,"val":"api","end":""},{"old":"/api/v1/attendances/full-day","type":0,"val":"v1","end":""},{"old":"/api/v1/attendances/full-day","type":0,"val":"attendances","end":""},{"old":"/api/v1/attendances/full-day","type":0,"val":"full-day","end":""}],
+    types: placeholder as Registry['attendances.attendances.full_day']['types'],
+  },
+  'attendances.attendances.partial': {
+    methods: ["POST"],
+    pattern: '/api/v1/attendances/partial',
+    tokens: [{"old":"/api/v1/attendances/partial","type":0,"val":"api","end":""},{"old":"/api/v1/attendances/partial","type":0,"val":"v1","end":""},{"old":"/api/v1/attendances/partial","type":0,"val":"attendances","end":""},{"old":"/api/v1/attendances/partial","type":0,"val":"partial","end":""}],
+    types: placeholder as Registry['attendances.attendances.partial']['types'],
+  },
+  'attendances.attendances.update': {
+    methods: ["PUT"],
+    pattern: '/api/v1/attendances/:id',
+    tokens: [{"old":"/api/v1/attendances/:id","type":0,"val":"api","end":""},{"old":"/api/v1/attendances/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/attendances/:id","type":0,"val":"attendances","end":""},{"old":"/api/v1/attendances/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['attendances.attendances.update']['types'],
+  },
+  'attendances.attendances.destroy': {
+    methods: ["DELETE"],
+    pattern: '/api/v1/attendances/:id',
+    tokens: [{"old":"/api/v1/attendances/:id","type":0,"val":"api","end":""},{"old":"/api/v1/attendances/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/attendances/:id","type":0,"val":"attendances","end":""},{"old":"/api/v1/attendances/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['attendances.attendances.destroy']['types'],
   },
 } as const satisfies Record<string, AdonisEndpoint>
 

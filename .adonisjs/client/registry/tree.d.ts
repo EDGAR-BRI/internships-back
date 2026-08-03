@@ -22,6 +22,12 @@ export interface ApiDefinition {
       destroy: typeof routes['profile.access_tokens.destroy']
     }
   }
+  settings: {
+    settings: {
+      show: typeof routes['settings.settings.show']
+      update: typeof routes['settings.settings.update']
+    }
+  }
   logEntries: {
     logEntries: {
       index: typeof routes['logEntries.log_entries.index']
@@ -43,8 +49,13 @@ export interface ApiDefinition {
   attendances: {
     attendances: {
       index: typeof routes['attendances.attendances.index']
+      summary: typeof routes['attendances.attendances.summary']
       checkIn: typeof routes['attendances.attendances.check_in']
       checkOut: typeof routes['attendances.attendances.check_out']
+      fullDay: typeof routes['attendances.attendances.full_day']
+      partial: typeof routes['attendances.attendances.partial']
+      update: typeof routes['attendances.attendances.update']
+      destroy: typeof routes['attendances.attendances.destroy']
     }
   }
 }

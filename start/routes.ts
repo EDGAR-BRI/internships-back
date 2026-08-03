@@ -93,8 +93,13 @@ router
     router
       .group(() => {
         router.get('/', [controllers.Attendances, 'index'])
+        router.get('summary', [controllers.Attendances, 'summary'])
         router.post('check-in', [controllers.Attendances, 'checkIn'])
         router.post('check-out', [controllers.Attendances, 'checkOut'])
+        router.post('full-day', [controllers.Attendances, 'fullDay'])
+        router.post('partial', [controllers.Attendances, 'partial'])
+        router.put(':id', [controllers.Attendances, 'update'])
+        router.delete(':id', [controllers.Attendances, 'destroy'])
       })
       .prefix('attendances')
       .as('attendances')

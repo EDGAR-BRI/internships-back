@@ -19,6 +19,12 @@ export default class Attendance extends BaseModel {
   @column.dateTime()
   declare checkOut: DateTime | null
 
+  @column()
+  declare isFullDay: boolean | null
+
+  @column()
+  declare hours: number | null
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 

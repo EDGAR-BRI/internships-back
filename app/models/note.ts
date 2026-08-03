@@ -15,6 +15,9 @@ export default class Note extends BaseModel {
   declare logEntryId: number | null
 
   @column()
+  declare title: string | null
+
+  @column()
   declare content: string
 
   @column.dateTime()

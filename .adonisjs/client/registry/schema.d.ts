@@ -79,6 +79,30 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/access_tokens_controller').default['destroy']>>>
     }
   }
+  'settings.settings.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/account/settings'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/settings_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/settings_controller').default['show']>>>
+    }
+  }
+  'settings.settings.update': {
+    methods: ["PUT"]
+    pattern: '/api/v1/account/settings'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/user_setting').updateSettingsValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/user_setting').updateSettingsValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/settings_controller').default['update']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/settings_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'logEntries.log_entries.index': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/log-entries'
@@ -211,6 +235,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/attendances_controller').default['index']>>>
     }
   }
+  'attendances.attendances.summary': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/attendances/summary'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/attendances_controller').default['summary']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/attendances_controller').default['summary']>>>
+    }
+  }
   'attendances.attendances.check_in': {
     methods: ["POST"]
     pattern: '/api/v1/attendances/check-in'
@@ -233,6 +269,54 @@ export interface Registry {
       query: ExtractQuery<InferInput<(typeof import('#validators/attendance').checkOutValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/attendances_controller').default['checkOut']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/attendances_controller').default['checkOut']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'attendances.attendances.full_day': {
+    methods: ["POST"]
+    pattern: '/api/v1/attendances/full-day'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/attendance').fullDayValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/attendance').fullDayValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/attendances_controller').default['fullDay']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/attendances_controller').default['fullDay']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'attendances.attendances.partial': {
+    methods: ["POST"]
+    pattern: '/api/v1/attendances/partial'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/attendance').partialValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/attendance').partialValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/attendances_controller').default['partial']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/attendances_controller').default['partial']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'attendances.attendances.update': {
+    methods: ["PUT"]
+    pattern: '/api/v1/attendances/:id'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/attendance').updateAttendanceValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/attendance').updateAttendanceValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/attendances_controller').default['update']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/attendances_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'attendances.attendances.destroy': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/attendances/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/attendances_controller').default['destroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/attendances_controller').default['destroy']>>>
     }
   }
 }

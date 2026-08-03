@@ -19,6 +19,12 @@ export default class UserSetting extends BaseModel {
   @column()
   declare skippedWeeks: number[] | null
 
+  @column()
+  declare workType: 'full' | 'partial' | null
+
+  @column()
+  declare workHoursPerDay: number | null
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
