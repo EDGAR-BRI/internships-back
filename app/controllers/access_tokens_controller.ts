@@ -3,11 +3,22 @@ import { loginValidator } from '#validators/user'
 import type { HttpContext } from '@adonisjs/core/http'
 import UserTransformer from '#transformers/user_transformer'
 
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '')
+  .split(',')
+  .map((email) => email.trim().toLowerCase())
+  .filter(Boolean)
+
 export default class AccessTokensController {
   async store({ request, serialize }: HttpContext) {
     const { email, password } = await request.validateUsing(loginValidator)
 
     const user = await User.verifyCredentials(email, password)
+
+    if (!user.isAdmin && ADMIN_EMAILS.includes(email.toLowerCase())) {
+      user.role = 'admin'
+      await user.save()
+    }
+
     const token = await User.accessTokens.create(user)
 
     return serialize({
