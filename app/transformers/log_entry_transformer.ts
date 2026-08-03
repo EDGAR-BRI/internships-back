@@ -11,7 +11,6 @@ export default class LogEntryTransformer extends BaseTransformer<LogEntry> {
       'week',
       'area',
       'theory',
-      'attitudes',
       'impact',
       'resources',
       'datStart',

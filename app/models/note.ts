@@ -20,6 +20,9 @@ export default class Note extends BaseModel {
   @column()
   declare content: string
 
+  @column()
+  declare tag: string
+
   @column.dateTime()
   declare date: DateTime | null
 

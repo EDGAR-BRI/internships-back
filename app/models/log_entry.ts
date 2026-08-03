@@ -27,9 +27,6 @@ export default class LogEntry extends BaseModel {
   declare theory: string | null
 
   @column()
-  declare attitudes: string | null
-
-  @column()
   declare impact: string | null
 
   @column()

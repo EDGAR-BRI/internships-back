@@ -9,6 +9,7 @@ export default class NoteTransformer extends BaseTransformer<Note> {
       'logEntryId',
       'title',
       'content',
+      'tag',
       'date',
       'createdAt',
       'updatedAt',
