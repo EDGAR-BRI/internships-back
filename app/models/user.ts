@@ -31,6 +31,9 @@ export default class User extends AuthFinder(BaseModel) {
   @column()
   declare role: string
 
+  @column()
+  declare avatarUrl: string | null
+
   @column({ serializeAs: null })
   declare provider: string | null
 

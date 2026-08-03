@@ -26,14 +26,18 @@ export default class GoogleAuthController {
       if (!user.provider) {
         user.provider = 'google'
         user.providerId = googleUser.id
-        await user.save()
       }
+      if (googleUser.avatarUrl) {
+        user.avatarUrl = googleUser.avatarUrl
+      }
+      await user.save()
     } else {
       user = await User.create({
         fullName: googleUser.name,
         email: googleUser.email,
         provider: 'google',
         providerId: googleUser.id,
+        avatarUrl: googleUser.avatarUrl ?? null,
       })
     }
 
@@ -45,6 +49,8 @@ export default class GoogleAuthController {
         id: user.id,
         fullName: user.fullName,
         email: user.email,
+        role: user.role,
+        avatarUrl: user.avatarUrl,
       }),
     })
 
