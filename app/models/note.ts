@@ -17,6 +17,9 @@ export default class Note extends BaseModel {
   @column()
   declare content: string
 
+  @column.dateTime()
+  declare date: DateTime | null
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
