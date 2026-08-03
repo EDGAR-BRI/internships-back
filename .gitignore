@@ -1,8 +1,12 @@
 # Dependencies and AdonisJS build
 node_modules
 build
-.adonisjs
-tmp/*
+# Generated index files are regenerated at build time; the Tuyau client
+# registry (.adonisjs/client) must be committed because ace build does not
+# regenerate it
+.adonisjs/*
+!.adonisjs/client/
+!.adonisjs/client/**
 !tmp/.gitkeep
 
 # Secrets

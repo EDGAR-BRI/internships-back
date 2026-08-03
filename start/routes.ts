@@ -15,7 +15,7 @@ router.get('/', () => {
   return { hello: 'world' }
 })
 
-router.get('/debug-env', async ({ response }) => {
+router.get('/debug-env', async () => {
   const env = await import('#start/env')
   return {
     processEnv: {
