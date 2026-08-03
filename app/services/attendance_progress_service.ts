@@ -65,12 +65,19 @@ export default class AttendanceProgressService {
     const remainingDays = Math.max(totalDaysCeil - completedDays, 0)
     const remainingHours = Math.max(totalHours - completedHours, 0)
 
+    const daysPerWeek = settings?.daysPerWeek ?? 5
+    const round1 = (n: number) => Math.round(n * 10) / 10
+    const totalWeeks = round1(totalDays / daysPerWeek)
+    const completedWeeks = round1(completedDays / daysPerWeek)
+    const remainingWeeks = round1(remainingDays / daysPerWeek)
+
     let targetEndDate: string | null = null
     if (settings?.startDate) {
       targetEndDate = this.computeTargetEndDate(
         settings.startDate,
         settings.skippedWeeks ?? [],
-        totalDays
+        totalDays,
+        settings.daysPerWeek ?? 5
       )
     }
 
@@ -106,6 +113,9 @@ export default class AttendanceProgressService {
       remainingHours: Math.round(remainingHours * 10) / 10,
       onSiteDays,
       remoteDays,
+      totalWeeks,
+      completedWeeks,
+      remainingWeeks,
       targetEndDate,
       estimatedEndDate,
       pace: {
@@ -115,19 +125,24 @@ export default class AttendanceProgressService {
     }
   }
 
-  static computeTargetEndDate(startDate: DateTime, skippedWeeks: number[], totalDays: number): string {
+  static computeTargetEndDate(
+    startDate: DateTime,
+    skippedWeeks: number[],
+    totalDays: number,
+    daysPerWeek: number
+  ): string {
     const start = startDate.startOf('day')
     let businessDaysCounted = 0
     let current = start
     const skippedSet = new Set(skippedWeeks)
 
     while (businessDaysCounted < totalDays) {
-      const weekday = current.weekday // Luxon ISO: 1=Mon ... 7=Sun
-      const isWeekend = weekday === 6 || weekday === 7
+      const dayIndex = current.weekday - 1 // 0=Lunes ... 6=Domingo
+      const isCountable = dayIndex < daysPerWeek
       const rawWeek = this.computeRawWeekNumber(start, current)
       const isSkipped = skippedSet.has(rawWeek)
 
-      if (!isWeekend && !isSkipped) {
+      if (isCountable && !isSkipped) {
         businessDaysCounted++
       }
 

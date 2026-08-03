@@ -29,6 +29,7 @@ export default class SettingsController {
         skippedWeeks: data.skippedWeeks ?? null,
         workType: data.workType ?? null,
         workHoursPerDay: data.workHoursPerDay ?? null,
+        daysPerWeek: data.daysPerWeek ?? null,
       }
     )
 

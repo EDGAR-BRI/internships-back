@@ -11,6 +11,7 @@ export default class UserSettingTransformer extends BaseTransformer<UserSetting>
       'skippedWeeks',
       'workType',
       'workHoursPerDay',
+      'daysPerWeek',
       'createdAt',
       'updatedAt',
     ])

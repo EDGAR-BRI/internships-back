@@ -8,4 +8,5 @@ export const updateSettingsValidator = vine.create({
   skippedWeeks: vine.array(vine.number().positive().withoutDecimals()).optional(),
   workType: vine.enum(['full', 'partial']).optional(),
   workHoursPerDay: vine.number().positive().withoutDecimals().optional(),
+  daysPerWeek: vine.number().positive().withoutDecimals().min(1).max(7).optional(),
 })
