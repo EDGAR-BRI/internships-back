@@ -22,8 +22,8 @@ export default class extends BaseSchema {
         INSERT INTO plans
           (slug, name, notes_per_day, log_entries_per_day, attendances_per_day, attendances_per_day_first_day, is_default, created_at, updated_at)
         VALUES
-          ('free', 'Gratis', 3, 4, 5, 15, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-          ('pro', 'Pro', NULL, NULL, NULL, NULL, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+          ('free', 'Gratis', 3, 4, 5, 15, true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+          ('pro', 'Pro', NULL, NULL, NULL, NULL, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       `)
     })
   }

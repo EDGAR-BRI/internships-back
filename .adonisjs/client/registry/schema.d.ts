@@ -31,6 +31,30 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/access_tokens_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'auth.password_reset.forgot': {
+    methods: ["POST"]
+    pattern: '/api/v1/auth/forgot-password'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/password_reset').forgotPasswordValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/password_reset').forgotPasswordValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/password_reset_controller').default['forgot']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/password_reset_controller').default['forgot']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'auth.password_reset.reset': {
+    methods: ["POST"]
+    pattern: '/api/v1/auth/reset-password'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/password_reset').resetPasswordValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/password_reset').resetPasswordValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/password_reset_controller').default['reset']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/password_reset_controller').default['reset']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'auth.google_auth.redirect': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/auth/google/redirect'
@@ -101,6 +125,30 @@ export interface Registry {
       query: ExtractQuery<InferInput<(typeof import('#validators/user_setting').updateSettingsValidator)>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/settings_controller').default['update']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/settings_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'subscription.subscription.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/account/subscription'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/subscription_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/subscription_controller').default['show']>>>
+    }
+  }
+  'subscription.subscription.request_upgrade': {
+    methods: ["POST"]
+    pattern: '/api/v1/account/subscription/upgrade-request'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/subscription_controller').default['requestUpgrade']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/subscription_controller').default['requestUpgrade']>>>
     }
   }
   'logEntries.log_entries.index': {
@@ -245,6 +293,138 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin_users_controller').default['summary']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin_users_controller').default['summary']>>>
+    }
+  }
+  'admin.admin_users.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/admin/users/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin_users_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin_users_controller').default['show']>>>
+    }
+  }
+  'admin.admin_users.update_role': {
+    methods: ["PATCH"]
+    pattern: '/api/v1/admin/users/:id/role'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/admin').updateRoleValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/admin').updateRoleValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin_users_controller').default['updateRole']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin_users_controller').default['updateRole']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'admin.admin_users.assign_subscription': {
+    methods: ["PUT"]
+    pattern: '/api/v1/admin/users/:id/subscription'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/subscription').assignPlanValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/subscription').assignPlanValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin_users_controller').default['assignSubscription']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin_users_controller').default['assignSubscription']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'admin.admin_users.destroy': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/admin/users/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin_users_controller').default['destroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin_users_controller').default['destroy']>>>
+    }
+  }
+  'admin.admin_plans.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/admin/plans'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin_plans_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin_plans_controller').default['index']>>>
+    }
+  }
+  'admin.admin_plans.store': {
+    methods: ["POST"]
+    pattern: '/api/v1/admin/plans'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/subscription').createPlanValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/subscription').createPlanValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin_plans_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin_plans_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'admin.admin_plans.update': {
+    methods: ["PUT"]
+    pattern: '/api/v1/admin/plans/:id'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/subscription').updatePlanValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/subscription').updatePlanValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin_plans_controller').default['update']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin_plans_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'admin.admin_plans.destroy': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/admin/plans/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin_plans_controller').default['destroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin_plans_controller').default['destroy']>>>
+    }
+  }
+  'admin.admin_upgrade_requests.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/admin/upgrade-requests'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin_upgrade_requests_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin_upgrade_requests_controller').default['index']>>>
+    }
+  }
+  'admin.admin_upgrade_requests.approve': {
+    methods: ["POST"]
+    pattern: '/api/v1/admin/upgrade-requests/:id/approve'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin_upgrade_requests_controller').default['approve']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin_upgrade_requests_controller').default['approve']>>>
+    }
+  }
+  'admin.admin_upgrade_requests.reject': {
+    methods: ["POST"]
+    pattern: '/api/v1/admin/upgrade-requests/:id/reject'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin_upgrade_requests_controller').default['reject']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin_upgrade_requests_controller').default['reject']>>>
     }
   }
   'attendances.attendances.index': {

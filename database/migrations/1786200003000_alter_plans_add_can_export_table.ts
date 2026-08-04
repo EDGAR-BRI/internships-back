@@ -9,8 +9,8 @@ export default class extends BaseSchema {
     })
 
     this.defer(async () => {
-      await this.db.rawQuery(`UPDATE plans SET can_export = 0 WHERE slug = 'free'`)
-      await this.db.rawQuery(`UPDATE plans SET can_export = 1 WHERE slug = 'pro'`)
+      await this.db.rawQuery(`UPDATE plans SET can_export = false WHERE slug = 'free'`)
+      await this.db.rawQuery(`UPDATE plans SET can_export = true WHERE slug = 'pro'`)
     })
   }
 
