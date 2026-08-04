@@ -94,6 +94,9 @@ router
       .group(() => {
         router.get('users', [controllers.AdminUsers, 'index'])
         router.get('summary', [controllers.AdminUsers, 'summary'])
+        router.get('users/:id', [controllers.AdminUsers, 'show'])
+        router.patch('users/:id/role', [controllers.AdminUsers, 'updateRole'])
+        router.delete('users/:id', [controllers.AdminUsers, 'destroy'])
       })
       .prefix('admin')
       .as('admin')
