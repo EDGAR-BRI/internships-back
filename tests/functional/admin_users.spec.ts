@@ -28,7 +28,7 @@ test.group('Admin users', () => {
   test('admin lists users', async ({ client, assert }) => {
     const res = await client.get('/api/v1/admin/users').loginAs(admin)
     res.assertStatus(200)
-    const raw = res.body()
+    const raw: any = res.body()
     const body = Array.isArray(raw) ? raw : raw.data
     const found = body.find((u: any) => u.email === regular.email)
     assert.exists(found)
@@ -38,7 +38,7 @@ test.group('Admin users', () => {
   test('admin gets summary', async ({ client, assert }) => {
     const res = await client.get('/api/v1/admin/summary').loginAs(admin)
     res.assertStatus(200)
-    const raw = res.body()
+    const raw: any = res.body()
     const summary = Array.isArray(raw) ? raw : raw.data.summary
     assert.isObject(summary)
     assert.isAbove(summary.totalUsers, 0)

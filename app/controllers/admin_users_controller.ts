@@ -3,18 +3,53 @@ import Attendance from '#models/attendance'
 import Note from '#models/note'
 import LogEntry from '#models/log_entry'
 import UserSetting from '#models/user_setting'
+import Subscription from '#models/subscription'
+import Plan from '#models/plan'
 import AttendanceProgressService from '#services/attendance_progress_service'
+import SubscriptionService from '#services/subscription_service'
 import { updateRoleValidator } from '#validators/admin'
+import { assignPlanValidator } from '#validators/subscription'
+import { DateTime } from 'luxon'
 import type { HttpContext } from '@adonisjs/core/http'
 
 export default class AdminUsersController {
   private settingsByUser = new Map<number, UserSetting>()
+  private planInfoByUser = new Map<
+    number,
+    { slug: string; name: string; expiresAt: DateTime | null; status: string }
+  >()
 
   private async loadSettings() {
     this.settingsByUser.clear()
     for (const s of await UserSetting.all()) {
       this.settingsByUser.set(s.userId, s)
     }
+  }
+
+  private async loadPlanInfo() {
+    this.planInfoByUser.clear()
+    const subs = await Subscription.query().preload('plan')
+    for (const s of subs) {
+      this.planInfoByUser.set(s.userId, {
+        slug: s.plan.slug,
+        name: s.plan.name,
+        expiresAt: s.expiresAt,
+        status: s.status,
+      })
+    }
+  }
+
+  private async planFor(userId: number) {
+    const entry = this.planInfoByUser.get(userId)
+    if (
+      entry &&
+      entry.status === 'active' &&
+      (!entry.expiresAt || entry.expiresAt > DateTime.now())
+    ) {
+      return { slug: entry.slug, name: entry.name, expiresAt: entry.expiresAt }
+    }
+    const def = await SubscriptionService.getDefaultPlan()
+    return { slug: def.slug, name: def.name, expiresAt: null }
   }
 
   private getSettings(userId: number): UserSetting | null {
@@ -67,6 +102,7 @@ export default class AdminUsersController {
       notesCount: notes.length,
       logEntriesCount: logEntries.length,
       lastActivity,
+      plan: await this.planFor(user.id),
     }
   }
 
@@ -165,6 +201,7 @@ export default class AdminUsersController {
 
   async index({ serialize }: HttpContext) {
     await this.loadSettings()
+    await this.loadPlanInfo()
     const users = await User.query().orderBy('createdAt', 'desc')
 
     const data = await Promise.all(users.map((user) => this.aggregate(user)))
@@ -215,7 +252,56 @@ export default class AdminUsersController {
     }
 
     await this.loadSettings()
-    return serialize(await this.buildDetail(user))
+    await this.loadPlanInfo()
+
+    const detail = await this.buildDetail(user)
+    const plan = await this.planFor(user.id)
+    const usage = {
+      notes: {
+        used: await SubscriptionService.countCreatedToday(user.id, 'notes'),
+        limit: await SubscriptionService.getDailyLimit(user, 'notes'),
+      },
+      logEntries: {
+        used: await SubscriptionService.countCreatedToday(user.id, 'logEntries'),
+        limit: await SubscriptionService.getDailyLimit(user, 'logEntries'),
+      },
+      attendances: {
+        used: await SubscriptionService.countCreatedToday(user.id, 'attendances'),
+        limit: await SubscriptionService.getDailyLimit(user, 'attendances'),
+      },
+    }
+
+    return serialize({ ...detail, plan, usage })
+  }
+
+  async assignSubscription({ params, request, response, serialize }: HttpContext) {
+    const user = await User.find(params.id)
+    if (!user) {
+      return response.notFound({ message: 'Usuario no encontrado' })
+    }
+
+    const payload = await request.validateUsing(assignPlanValidator)
+    const plan = await Plan.query().where('slug', payload.planSlug).first()
+    if (!plan) {
+      return response.badRequest({ message: 'El plan no existe' })
+    }
+
+    const rawExpires = payload.expiresAt
+    const expiresAt = rawExpires
+      ? DateTime.isDateTime(rawExpires)
+        ? rawExpires
+        : DateTime.fromJSDate(rawExpires as unknown as Date)
+      : null
+    await SubscriptionService.assignPlan(user.id, plan.slug, expiresAt)
+
+    return serialize({
+      id: user.id,
+      plan: {
+        slug: plan.slug,
+        name: plan.name,
+        expiresAt,
+      },
+    })
   }
 
   async updateRole({ params, request, response, auth, serialize }: HttpContext) {

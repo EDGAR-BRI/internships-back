@@ -9,6 +9,8 @@ import Attendance from '#models/attendance'
 import LogEntry from '#models/log_entry'
 import Note from '#models/note'
 import UserSetting from '#models/user_setting'
+import Subscription from '#models/subscription'
+import UpgradeRequest from '#models/upgrade_request'
 
 const AuthFinder = withAuthFinder(hash as unknown as HashManager<any>, {
   uids: ['email'],
@@ -74,4 +76,10 @@ export default class User extends AuthFinder(BaseModel) {
 
   @hasOne(() => UserSetting)
   declare settings: HasOne<typeof UserSetting>
+
+  @hasOne(() => Subscription)
+  declare subscription: HasOne<typeof Subscription>
+
+  @hasMany(() => UpgradeRequest)
+  declare upgradeRequests: HasMany<typeof UpgradeRequest>
 }

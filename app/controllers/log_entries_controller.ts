@@ -2,6 +2,7 @@ import LogEntry from '#models/log_entry'
 import type { HttpContext } from '@adonisjs/core/http'
 import { createLogEntryValidator, updateLogEntryValidator } from '#validators/log_entry'
 import LogEntryTransformer from '#transformers/log_entry_transformer'
+import SubscriptionService from '#services/subscription_service'
 
 export default class LogEntriesController {
   async index({ auth, serialize }: HttpContext) {
@@ -13,9 +14,20 @@ export default class LogEntriesController {
     })
   }
 
-  async store({ request, auth, serialize }: HttpContext) {
+  async store({ request, auth, serialize, response }: HttpContext) {
     const user = auth.getUserOrFail()
     const data = await request.validateUsing(createLogEntryValidator)
+
+    const usage = await SubscriptionService.getUsage(user, 'logEntries')
+    if (usage.limit !== null && usage.used >= usage.limit) {
+      return response.tooManyRequests({
+        message: SubscriptionService.limitMessage(usage.plan.name, 'actividades', usage.limit),
+        code: 'DAILY_LIMIT',
+        resource: 'logEntries',
+        used: usage.used,
+        limit: usage.limit,
+      })
+    }
 
     const logEntry = await LogEntry.create({
       ...data,

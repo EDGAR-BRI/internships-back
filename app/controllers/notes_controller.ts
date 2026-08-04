@@ -2,6 +2,7 @@ import Note from '#models/note'
 import type { HttpContext } from '@adonisjs/core/http'
 import { createNoteValidator, updateNoteValidator } from '#validators/note'
 import NoteTransformer from '#transformers/note_transformer'
+import SubscriptionService from '#services/subscription_service'
 
 export default class NotesController {
   async index({ auth, request, serialize }: HttpContext) {
@@ -21,9 +22,20 @@ export default class NotesController {
     })
   }
 
-  async store({ request, auth, serialize }: HttpContext) {
+  async store({ request, auth, serialize, response }: HttpContext) {
     const user = auth.getUserOrFail()
     const data = await request.validateUsing(createNoteValidator)
+
+    const usage = await SubscriptionService.getUsage(user, 'notes')
+    if (usage.limit !== null && usage.used >= usage.limit) {
+      return response.tooManyRequests({
+        message: SubscriptionService.limitMessage(usage.plan.name, 'notas', usage.limit),
+        code: 'DAILY_LIMIT',
+        resource: 'notes',
+        used: usage.used,
+        limit: usage.limit,
+      })
+    }
 
     const note = await Note.create({
       ...data,

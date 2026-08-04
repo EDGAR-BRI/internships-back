@@ -1,6 +1,7 @@
 import Attendance from '#models/attendance'
 import UserSetting from '#models/user_setting'
 import AttendanceProgressService from '#services/attendance_progress_service'
+import SubscriptionService from '#services/subscription_service'
 import {
   checkInValidator,
   checkOutValidator,
@@ -28,7 +29,7 @@ export default class AttendancesController {
     return serialize(data)
   }
 
-  async checkIn({ auth, request, serialize }: HttpContext) {
+  async checkIn({ auth, request, serialize, response }: HttpContext) {
     const user = auth.getUserOrFail()
     const { date, isFullDay, mode } = await request.validateUsing(checkInValidator)
     const dateObj = DateTime.fromISO(date, { zone: 'America/Mexico_City' }).startOf('day')
@@ -40,6 +41,20 @@ export default class AttendancesController {
       .first()
 
     if (!attendance) {
+      const limit = await SubscriptionService.getDailyLimit(user, 'attendances')
+      if (limit !== null) {
+        const used = await SubscriptionService.countCreatedToday(user.id, 'attendances')
+        if (used >= limit) {
+          const plan = await SubscriptionService.getPlanFor(user.id)
+          return response.tooManyRequests({
+            message: SubscriptionService.limitMessage(plan.name, 'asistencias', limit),
+            code: 'DAILY_LIMIT',
+            resource: 'attendances',
+            used,
+            limit,
+          })
+        }
+      }
       attendance = new Attendance()
       attendance.userId = user.id
       attendance.date = dateObj
@@ -79,7 +94,7 @@ export default class AttendancesController {
     })
   }
 
-  async fullDay({ auth, request, serialize }: HttpContext) {
+  async fullDay({ auth, request, serialize, response }: HttpContext) {
     const user = auth.getUserOrFail()
     const { date, mode } = await request.validateUsing(fullDayValidator)
     const dateObj = DateTime.fromISO(date, { zone: 'America/Mexico_City' }).startOf('day')
@@ -91,6 +106,20 @@ export default class AttendancesController {
       .first()
 
     if (!attendance) {
+      const limit = await SubscriptionService.getDailyLimit(user, 'attendances')
+      if (limit !== null) {
+        const used = await SubscriptionService.countCreatedToday(user.id, 'attendances')
+        if (used >= limit) {
+          const plan = await SubscriptionService.getPlanFor(user.id)
+          return response.tooManyRequests({
+            message: SubscriptionService.limitMessage(plan.name, 'asistencias', limit),
+            code: 'DAILY_LIMIT',
+            resource: 'attendances',
+            used,
+            limit,
+          })
+        }
+      }
       attendance = new Attendance()
       attendance.userId = user.id
       attendance.date = dateObj
@@ -109,7 +138,7 @@ export default class AttendancesController {
     })
   }
 
-  async partial({ auth, request, serialize }: HttpContext) {
+  async partial({ auth, request, serialize, response }: HttpContext) {
     const user = auth.getUserOrFail()
     const { date, hours, mode } = await request.validateUsing(partialValidator)
     const dateObj = DateTime.fromISO(date, { zone: 'America/Mexico_City' }).startOf('day')
@@ -121,6 +150,20 @@ export default class AttendancesController {
       .first()
 
     if (!attendance) {
+      const limit = await SubscriptionService.getDailyLimit(user, 'attendances')
+      if (limit !== null) {
+        const used = await SubscriptionService.countCreatedToday(user.id, 'attendances')
+        if (used >= limit) {
+          const plan = await SubscriptionService.getPlanFor(user.id)
+          return response.tooManyRequests({
+            message: SubscriptionService.limitMessage(plan.name, 'asistencias', limit),
+            code: 'DAILY_LIMIT',
+            resource: 'attendances',
+            used,
+            limit,
+          })
+        }
+      }
       attendance = new Attendance()
       attendance.userId = user.id
       attendance.date = dateObj

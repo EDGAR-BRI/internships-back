@@ -68,6 +68,15 @@ router
 
     router
       .group(() => {
+        router.get('/', [controllers.Subscription, 'show'])
+        router.post('upgrade-request', [controllers.Subscription, 'requestUpgrade'])
+      })
+      .prefix('account/subscription')
+      .as('subscription')
+      .use(middleware.auth())
+
+    router
+      .group(() => {
         router.get('/', [controllers.LogEntries, 'index'])
         router.post('/', [controllers.LogEntries, 'store'])
         router.get(':id', [controllers.LogEntries, 'show'])
@@ -96,7 +105,15 @@ router
         router.get('summary', [controllers.AdminUsers, 'summary'])
         router.get('users/:id', [controllers.AdminUsers, 'show'])
         router.patch('users/:id/role', [controllers.AdminUsers, 'updateRole'])
+        router.put('users/:id/subscription', [controllers.AdminUsers, 'assignSubscription'])
         router.delete('users/:id', [controllers.AdminUsers, 'destroy'])
+        router.get('plans', [controllers.AdminPlans, 'index'])
+        router.post('plans', [controllers.AdminPlans, 'store'])
+        router.put('plans/:id', [controllers.AdminPlans, 'update'])
+        router.delete('plans/:id', [controllers.AdminPlans, 'destroy'])
+        router.get('upgrade-requests', [controllers.AdminUpgradeRequests, 'index'])
+        router.post('upgrade-requests/:id/approve', [controllers.AdminUpgradeRequests, 'approve'])
+        router.post('upgrade-requests/:id/reject', [controllers.AdminUpgradeRequests, 'reject'])
       })
       .prefix('admin')
       .as('admin')
