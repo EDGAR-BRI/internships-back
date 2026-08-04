@@ -42,8 +42,6 @@ router
       .group(() => {
         router.post('signup', [controllers.NewAccount, 'store'])
         router.post('login', [controllers.AccessTokens, 'store'])
-        router.post('forgot-password', [controllers.PasswordReset, 'forgot'])
-        router.post('reset-password', [controllers.PasswordReset, 'reset'])
         router.get('google/redirect', [controllers.GoogleAuth, 'redirect'])
         router.get('google/callback', [controllers.GoogleAuth, 'callback'])
       })
