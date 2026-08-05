@@ -289,6 +289,10 @@ test.group('Subscriptions', () => {
     proRes.assertStatus(200)
     assert.equal(proRes.body().data.subscription.planSlug, 'pro')
     assert.equal(proRes.body().data.subscription.canExport, true)
+
+    const adminRes = await client.get('/api/v1/account/subscription').loginAs(admin)
+    adminRes.assertStatus(200)
+    assert.equal(adminRes.body().data.subscription.canExport, true)
   })
 
   test('admin toggles plan canExport', async ({ client, assert }) => {

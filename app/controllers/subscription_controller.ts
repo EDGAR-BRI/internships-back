@@ -13,7 +13,7 @@ export default class SubscriptionController {
       subscription: {
         planSlug: plan.slug,
         planName: plan.name,
-        canExport: plan.canExport,
+        canExport: user.isAdmin || plan.canExport,
         expiresAt: sub?.expiresAt ?? null,
       },
     })
