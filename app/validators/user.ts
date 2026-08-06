@@ -31,6 +31,7 @@ export const loginValidator = vine.create({
 export const updateProfileValidator = vine.create({
   fullName: vine.string().trim().maxLength(100).nullable().optional(),
   avatarUrl: vine.string().trim().maxLength(500).nullable().optional(),
+  profilePublic: vine.boolean().optional(),
 })
 
 /**

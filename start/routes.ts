@@ -136,5 +136,17 @@ router
       .prefix('attendances')
       .as('attendances')
       .use(middleware.auth())
+
+    router
+      .group(() => {
+        router.get('ranking', [controllers.Community, 'ranking'])
+        router.get('notes', [controllers.Community, 'notes'])
+        router.get('users/:id', [controllers.Community, 'publicProfile'])
+        router.post('notes/:id/comments', [controllers.Community, 'addComment'])
+        router.delete('comments/:id', [controllers.Community, 'deleteComment'])
+      })
+      .prefix('community')
+      .as('community')
+      .use(middleware.auth())
   })
   .prefix('/api/v1')

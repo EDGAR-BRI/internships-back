@@ -8,6 +8,7 @@ import type { HashManager } from '@adonisjs/core/hash'
 import Attendance from '#models/attendance'
 import LogEntry from '#models/log_entry'
 import Note from '#models/note'
+import NoteComment from '#models/note_comment'
 import UserSetting from '#models/user_setting'
 import Subscription from '#models/subscription'
 import UpgradeRequest from '#models/upgrade_request'
@@ -35,6 +36,9 @@ export default class User extends AuthFinder(BaseModel) {
 
   @column()
   declare avatarUrl: string | null
+
+  @column()
+  declare profilePublic: boolean
 
   @column({ serializeAs: null })
   declare provider: string | null
@@ -73,6 +77,9 @@ export default class User extends AuthFinder(BaseModel) {
 
   @hasMany(() => Note)
   declare notes: HasMany<typeof Note>
+
+  @hasMany(() => NoteComment)
+  declare comments: HasMany<typeof NoteComment>
 
   @hasOne(() => UserSetting)
   declare settings: HasOne<typeof UserSetting>

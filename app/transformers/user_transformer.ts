@@ -9,6 +9,7 @@ export default class UserTransformer extends BaseTransformer<User> {
       'email',
       'role',
       'avatarUrl',
+      'profilePublic',
       'createdAt',
       'updatedAt',
       'initials',
