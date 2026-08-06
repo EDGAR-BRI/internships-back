@@ -9,10 +9,6 @@ export interface ApiDefinition {
     accessTokens: {
       store: typeof routes['auth.access_tokens.store']
     }
-    passwordReset: {
-      forgot: typeof routes['auth.password_reset.forgot']
-      reset: typeof routes['auth.password_reset.reset']
-    }
     googleAuth: {
       redirect: typeof routes['auth.google_auth.redirect']
       callback: typeof routes['auth.google_auth.callback']
@@ -21,6 +17,8 @@ export interface ApiDefinition {
   profile: {
     profile: {
       show: typeof routes['profile.profile.show']
+      update: typeof routes['profile.profile.update']
+      changePassword: typeof routes['profile.profile.change_password']
     }
     accessTokens: {
       destroy: typeof routes['profile.access_tokens.destroy']
