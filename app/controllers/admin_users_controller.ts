@@ -7,6 +7,7 @@ import Subscription from '#models/subscription'
 import Plan from '#models/plan'
 import AttendanceProgressService from '#services/attendance_progress_service'
 import SubscriptionService from '#services/subscription_service'
+import CacheService from '#services/cache_service'
 import { updateRoleValidator } from '#validators/admin'
 import { assignPlanValidator } from '#validators/subscription'
 import { DateTime } from 'luxon'
@@ -293,6 +294,7 @@ export default class AdminUsersController {
         : DateTime.fromJSDate(rawExpires as unknown as Date)
       : null
     await SubscriptionService.assignPlan(user.id, plan.slug, expiresAt)
+    await CacheService.invalidateUser(user.id)
 
     return serialize({
       id: user.id,
@@ -328,6 +330,7 @@ export default class AdminUsersController {
 
     user.role = payload.role
     await user.save()
+    await CacheService.invalidateUser(user.id)
 
     return serialize({
       id: user.id,

@@ -2,6 +2,7 @@ import User from '#models/user'
 import { loginValidator } from '#validators/user'
 import type { HttpContext } from '@adonisjs/core/http'
 import UserTransformer from '#transformers/user_transformer'
+import CacheService from '#services/cache_service'
 
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '')
   .split(',')
@@ -17,6 +18,7 @@ export default class AccessTokensController {
     if (!user.isAdmin && ADMIN_EMAILS.includes(email.toLowerCase())) {
       user.role = 'admin'
       await user.save()
+      await CacheService.invalidateUser(user.id)
     }
 
     const token = await User.accessTokens.create(user)
@@ -32,6 +34,8 @@ export default class AccessTokensController {
     if (user.currentAccessToken) {
       await User.accessTokens.delete(user, user.currentAccessToken.identifier)
     }
+
+    await CacheService.invalidateUser(user.id)
 
     return {
       message: 'Logged out successfully',

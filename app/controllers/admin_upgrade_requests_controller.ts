@@ -1,6 +1,7 @@
 import UpgradeRequest from '#models/upgrade_request'
 import Plan from '#models/plan'
 import SubscriptionService from '#services/subscription_service'
+import CacheService from '#services/cache_service'
 import { DateTime } from 'luxon'
 import type { HttpContext } from '@adonisjs/core/http'
 
@@ -39,6 +40,7 @@ export default class AdminUpgradeRequestsController {
     }
 
     await SubscriptionService.assignPlan(request.userId, request.planSlug)
+    await CacheService.invalidateUser(request.userId)
     request.status = 'approved'
     request.resolvedAt = DateTime.now()
     await request.save()

@@ -281,18 +281,18 @@ test.group('Subscriptions', () => {
   test('user subscription endpoint reports plan and canExport', async ({ client, assert }) => {
     const res = await client.get('/api/v1/account/subscription').loginAs(oldUser)
     res.assertStatus(200)
-    const sub = res.body().data.subscription
+    const sub: any = (res.body() as any).data.subscription
     assert.equal(sub.planSlug, 'free')
     assert.equal(sub.canExport, false)
 
     const proRes = await client.get('/api/v1/account/subscription').loginAs(freeUser)
     proRes.assertStatus(200)
-    assert.equal(proRes.body().data.subscription.planSlug, 'pro')
-    assert.equal(proRes.body().data.subscription.canExport, true)
+    assert.equal((proRes.body() as any).data.subscription.planSlug, 'pro')
+    assert.equal((proRes.body() as any).data.subscription.canExport, true)
 
     const adminRes = await client.get('/api/v1/account/subscription').loginAs(admin)
     adminRes.assertStatus(200)
-    assert.equal(adminRes.body().data.subscription.canExport, true)
+    assert.equal((adminRes.body() as any).data.subscription.canExport, true)
   })
 
   test('admin toggles plan canExport', async ({ client, assert }) => {

@@ -65,6 +65,7 @@
     "@adonisjs/shield": "^9.0.0",
     "@japa/api-client": "^3.2.1",
     "@tuyau/core": "^1.2.2",
+    "@upstash/redis": "^1.38.2",
     "@vinejs/vine": "^4.4.0",
     "better-sqlite3": "^12.10.0",
     "luxon": "^3.7.2",

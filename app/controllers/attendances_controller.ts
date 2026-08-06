@@ -11,10 +11,18 @@ import {
 } from '#validators/attendance'
 import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
+import CacheService from '#services/cache_service'
 
 export default class AttendancesController {
   async index({ auth, serialize }: HttpContext) {
     const user = auth.getUserOrFail()
+    const cacheKey = CacheService.userKey(user.id, 'attendances')
+
+    const cached = await CacheService.get(cacheKey)
+    if (cached) {
+      return serialize(cached)
+    }
+
     const settings = await UserSetting.query().where('userId', user.id).first()
     const attendances = await Attendance.query()
       .where('user_id', user.id)
@@ -26,6 +34,7 @@ export default class AttendancesController {
       hours: AttendanceProgressService.computeDayHours(a, settings),
     }))
 
+    await CacheService.set(cacheKey, data)
     return serialize(data)
   }
 
@@ -65,6 +74,8 @@ export default class AttendancesController {
     attendance.mode = mode ?? null
     await attendance.save()
 
+    await CacheService.invalidateUser(user.id)
+
     const settings = await UserSetting.query().where('userId', user.id).first()
 
     return serialize({
@@ -85,6 +96,8 @@ export default class AttendancesController {
 
     attendance.checkOut = DateTime.now()
     await attendance.save()
+
+    await CacheService.invalidateUser(user.id)
 
     const settings = await UserSetting.query().where('userId', user.id).first()
 
@@ -130,6 +143,8 @@ export default class AttendancesController {
     attendance.mode = mode ?? null
     await attendance.save()
 
+    await CacheService.invalidateUser(user.id)
+
     const settings = await UserSetting.query().where('userId', user.id).first()
 
     return serialize({
@@ -173,6 +188,8 @@ export default class AttendancesController {
     attendance.isFullDay = false
     attendance.mode = mode ?? null
     await attendance.save()
+
+    await CacheService.invalidateUser(user.id)
 
     const settings = await UserSetting.query().where('userId', user.id).first()
 
@@ -226,6 +243,8 @@ export default class AttendancesController {
 
     await attendance.save()
 
+    await CacheService.invalidateUser(user.id)
+
     const settings = await UserSetting.query().where('userId', user.id).first()
 
     return serialize({
@@ -242,12 +261,22 @@ export default class AttendancesController {
       .firstOrFail()
 
     await attendance.delete()
+    await CacheService.invalidateUser(user.id)
     return response.noContent()
   }
 
   async summary({ auth, serialize }: HttpContext) {
     const user = auth.getUserOrFail()
+    const cacheKey = CacheService.userKey(user.id, 'attendances:summary')
+
+    const cached = await CacheService.get(cacheKey)
+    if (cached) {
+      return serialize(cached)
+    }
+
     const summary = await AttendanceProgressService.getSummary(user.id)
-    return serialize({ summary })
+    const payload = { summary }
+    await CacheService.set(cacheKey, payload)
+    return serialize(payload)
   }
 }

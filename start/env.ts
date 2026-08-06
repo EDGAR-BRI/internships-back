@@ -40,4 +40,14 @@ export default await Env.create(new URL('../', import.meta.url), {
   */
   FRONTEND_URL: Env.schema.string.optional(),
   GOOGLE_CALLBACK_URL: Env.schema.string.optional(),
+
+  /*
+  |----------------------------------------------------------
+  | Cache (Upstash Redis opcional)
+  |----------------------------------------------------------
+  */
+  CACHE_ENABLED: Env.schema.boolean.optional(),
+  CACHE_TTL_SECONDS: Env.schema.number.optional(),
+  UPSTASH_REDIS_REST_URL: Env.schema.string.optional(),
+  UPSTASH_REDIS_REST_TOKEN: Env.schema.string.optional(),
 })

@@ -3,11 +3,18 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { createNoteValidator, updateNoteValidator } from '#validators/note'
 import NoteTransformer from '#transformers/note_transformer'
 import SubscriptionService from '#services/subscription_service'
+import CacheService from '#services/cache_service'
 
 export default class NotesController {
   async index({ auth, request, serialize }: HttpContext) {
     const user = auth.getUserOrFail()
     const logEntryId = request.input('logEntryId')
+    const cacheKey = CacheService.userKey(user.id, `notes:${logEntryId ?? 'all'}`)
+
+    const cached = await CacheService.get(cacheKey)
+    if (cached) {
+      return serialize(cached)
+    }
 
     const query = Note.query().where('userId', user.id).orderBy('createdAt', 'desc')
 
@@ -16,10 +23,10 @@ export default class NotesController {
     }
 
     const notes = await query
+    const payload = { notes: notes.map((n) => new NoteTransformer(n).toObject()) }
 
-    return serialize({
-      notes: NoteTransformer.transform(notes),
-    })
+    await CacheService.set(cacheKey, payload)
+    return serialize(payload)
   }
 
   async store({ request, auth, serialize, response }: HttpContext) {
@@ -41,6 +48,8 @@ export default class NotesController {
       ...data,
       userId: user.id,
     })
+
+    await CacheService.invalidateUser(user.id)
 
     return serialize({
       note: NoteTransformer.transform(note),
@@ -64,6 +73,8 @@ export default class NotesController {
     note.merge(data)
     await note.save()
 
+    await CacheService.invalidateUser(user.id)
+
     return serialize({
       note: NoteTransformer.transform(note),
     })
@@ -74,6 +85,7 @@ export default class NotesController {
     const note = await Note.query().where('id', params.id).where('userId', user.id).firstOrFail()
 
     await note.delete()
+    await CacheService.invalidateUser(user.id)
 
     return response.noContent()
   }

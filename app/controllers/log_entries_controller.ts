@@ -3,15 +3,25 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { createLogEntryValidator, updateLogEntryValidator } from '#validators/log_entry'
 import LogEntryTransformer from '#transformers/log_entry_transformer'
 import SubscriptionService from '#services/subscription_service'
+import CacheService from '#services/cache_service'
 
 export default class LogEntriesController {
   async index({ auth, serialize }: HttpContext) {
     const user = auth.getUserOrFail()
-    const logEntries = await LogEntry.query().where('userId', user.id).orderBy('createdAt', 'desc')
+    const cacheKey = CacheService.userKey(user.id, 'log-entries')
 
-    return serialize({
-      logEntries: LogEntryTransformer.transform(logEntries),
-    })
+    const cached = await CacheService.get(cacheKey)
+    if (cached) {
+      return serialize(cached)
+    }
+
+    const logEntries = await LogEntry.query().where('userId', user.id).orderBy('createdAt', 'desc')
+    const payload = {
+      logEntries: logEntries.map((e) => new LogEntryTransformer(e).toObject()),
+    }
+
+    await CacheService.set(cacheKey, payload)
+    return serialize(payload)
   }
 
   async store({ request, auth, serialize, response }: HttpContext) {
@@ -33,6 +43,8 @@ export default class LogEntriesController {
       ...data,
       userId: user.id,
     })
+
+    await CacheService.invalidateUser(user.id)
 
     return serialize({
       logEntry: LogEntryTransformer.transform(logEntry),
@@ -62,6 +74,8 @@ export default class LogEntriesController {
     logEntry.merge(data)
     await logEntry.save()
 
+    await CacheService.invalidateUser(user.id)
+
     return serialize({
       logEntry: LogEntryTransformer.transform(logEntry),
     })
@@ -75,6 +89,7 @@ export default class LogEntriesController {
       .firstOrFail()
 
     await logEntry.delete()
+    await CacheService.invalidateUser(user.id)
 
     return response.noContent()
   }
