@@ -28,6 +28,12 @@ export default class UserSetting extends BaseModel {
   @column()
   declare daysPerWeek: number | null
 
+  @column()
+  declare workStartTime: string | null
+
+  @column()
+  declare workEndTime: string | null
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 

@@ -40,6 +40,8 @@ export default class SettingsController {
         workType: data.workType ?? null,
         workHoursPerDay: data.workHoursPerDay ?? null,
         daysPerWeek: data.daysPerWeek ?? null,
+        workStartTime: data.workStartTime ?? null,
+        workEndTime: data.workEndTime ?? null,
       }
     )
 

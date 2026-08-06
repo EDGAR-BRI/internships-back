@@ -166,6 +166,8 @@ export default class AdminUsersController {
             workType: settings.workType,
             workHoursPerDay: settings.workHoursPerDay,
             daysPerWeek: settings.daysPerWeek,
+            workStartTime: settings.workStartTime,
+            workEndTime: settings.workEndTime,
             skippedWeeks: settings.skippedWeeks,
           }
         : null,

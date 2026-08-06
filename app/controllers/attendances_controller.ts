@@ -155,7 +155,7 @@ export default class AttendancesController {
 
   async partial({ auth, request, serialize, response }: HttpContext) {
     const user = auth.getUserOrFail()
-    const { date, hours, mode } = await request.validateUsing(partialValidator)
+    const { date, hours, mode, checkIn, checkOut } = await request.validateUsing(partialValidator)
     const dateObj = DateTime.fromISO(date, { zone: 'America/Mexico_City' }).startOf('day')
     const dateStr = dateObj.toSQLDate()!
 
@@ -187,6 +187,16 @@ export default class AttendancesController {
     attendance.hours = hours
     attendance.isFullDay = false
     attendance.mode = mode ?? null
+    if (checkIn) {
+      attendance.checkIn = DateTime.fromISO(`${date}T${checkIn}:00`, {
+        zone: 'America/Mexico_City',
+      })
+    }
+    if (checkOut) {
+      attendance.checkOut = DateTime.fromISO(`${date}T${checkOut}:00`, {
+        zone: 'America/Mexico_City',
+      })
+    }
     await attendance.save()
 
     await CacheService.invalidateUser(user.id)
@@ -239,6 +249,18 @@ export default class AttendancesController {
     }
     if (data.mode !== undefined) {
       attendance.mode = data.mode
+    }
+    if (data.checkIn !== undefined) {
+      const day = attendance.date.toISODate()!
+      attendance.checkIn = DateTime.fromISO(`${day}T${data.checkIn}:00`, {
+        zone: 'America/Mexico_City',
+      })
+    }
+    if (data.checkOut !== undefined) {
+      const day = attendance.date.toISODate()!
+      attendance.checkOut = DateTime.fromISO(`${day}T${data.checkOut}:00`, {
+        zone: 'America/Mexico_City',
+      })
     }
 
     await attendance.save()
