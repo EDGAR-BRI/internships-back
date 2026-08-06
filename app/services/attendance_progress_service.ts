@@ -31,9 +31,12 @@ export default class AttendanceProgressService {
     return Math.min(hours, fullDayHours)
   }
 
-  static countCompletedDay(attendance: Attendance): number {
+  static countCompletedDay(attendance: Attendance, settings: UserSetting | null): number {
     if (attendance.isFullDay && attendance.checkOut) return 1
-    if (attendance.hours !== null && attendance.hours !== undefined && attendance.hours > 0) return 1
+    const fullDayHours = this.getWorkHoursPerDay(settings)
+    if (attendance.hours !== null && attendance.hours !== undefined && attendance.hours > 0) {
+      return Math.min(attendance.hours, fullDayHours) / fullDayHours
+    }
     return 0
   }
 
@@ -50,19 +53,19 @@ export default class AttendanceProgressService {
     let onSiteDays = 0
     let remoteDays = 0
     for (const a of attendances) {
-      completedDays += this.countCompletedDay(a)
+      const day = this.countCompletedDay(a, settings)
+      completedDays += day
       completedHours += this.computeDayHours(a, settings)
-      if (this.countCompletedDay(a) === 1) {
+      if (day > 0) {
         if (a.mode === 'remote') {
-          remoteDays++
+          remoteDays += day
         } else {
-          onSiteDays++
+          onSiteDays += day
         }
       }
     }
 
-    const totalDaysCeil = Math.ceil(totalDays)
-    const remainingDays = Math.max(totalDaysCeil - completedDays, 0)
+    const remainingDays = Math.round(Math.max(totalDays - completedDays, 0) * 10) / 10
     const remainingHours = Math.max(totalHours - completedHours, 0)
 
     const daysPerWeek = settings?.daysPerWeek ?? 5
@@ -107,12 +110,12 @@ export default class AttendanceProgressService {
       totalDays: Math.round(totalDays * 10) / 10,
       totalHours,
       fullDayHours,
-      completedDays,
+      completedDays: Math.round(completedDays * 10) / 10,
       completedHours: Math.round(completedHours * 10) / 10,
       remainingDays,
       remainingHours: Math.round(remainingHours * 10) / 10,
-      onSiteDays,
-      remoteDays,
+      onSiteDays: Math.round(onSiteDays * 10) / 10,
+      remoteDays: Math.round(remoteDays * 10) / 10,
       totalWeeks,
       completedWeeks,
       remainingWeeks,

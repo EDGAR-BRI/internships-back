@@ -69,11 +69,11 @@ export default class AdminUsersController {
     let remoteDays = 0
     let lastActivity = user.updatedAt ?? user.createdAt
     for (const a of attendances) {
-      const day = AttendanceProgressService.countCompletedDay(a)
+      const day = AttendanceProgressService.countCompletedDay(a, settings)
       const hours = AttendanceProgressService.computeDayHours(a, settings)
       completedDays += day
       completedHours += hours
-      if (day === 1) {
+      if (day > 0) {
         if (a.mode === 'remote') {
           remoteDays++
         } else {
@@ -97,7 +97,7 @@ export default class AdminUsersController {
       role: user.role,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
-      completedDays,
+      completedDays: Math.round(completedDays * 10) / 10,
       completedHours: Math.round(completedHours * 10) / 10,
       attendanceCount: attendances.length,
       notesCount: notes.length,
@@ -123,15 +123,15 @@ export default class AdminUsersController {
 
     const attendancesData = []
     for (const a of attendances) {
-      const day = AttendanceProgressService.countCompletedDay(a)
+      const day = AttendanceProgressService.countCompletedDay(a, settings)
       const hours = AttendanceProgressService.computeDayHours(a, settings)
       completedDays += day
       completedHours += hours
-      if (day === 1) {
+      if (day > 0) {
         if (a.mode === 'remote') {
-          remoteDays++
+          remoteDays += day
         } else {
-          onSiteDays++
+          onSiteDays += day
         }
       }
       attendancesData.push({
@@ -142,7 +142,7 @@ export default class AdminUsersController {
         hours: a.hours,
         checkIn: a.checkIn,
         checkOut: a.checkOut,
-        completedDay: day === 1,
+        completedDay: day > 0,
         dayHours: Math.round(hours * 10) / 10,
       })
     }
@@ -173,12 +173,12 @@ export default class AdminUsersController {
         fullDayHours,
         totalDays: Math.round(totalDays * 10) / 10,
         totalHours,
-        completedDays,
+        completedDays: Math.round(completedDays * 10) / 10,
         completedHours: Math.round(completedHours * 10) / 10,
-        remainingDays: Math.max(Math.ceil(totalDays) - completedDays, 0),
+        remainingDays: Math.round(Math.max(totalDays - completedDays, 0) * 10) / 10,
         remainingHours: Math.round(Math.max(totalHours - completedHours, 0) * 10) / 10,
-        onSiteDays,
-        remoteDays,
+        onSiteDays: Math.round(onSiteDays * 10) / 10,
+        remoteDays: Math.round(remoteDays * 10) / 10,
         percent: totalHours > 0 ? Math.round((completedHours / totalHours) * 100) : 0,
       },
       attendances: attendancesData.slice(0, 30),
