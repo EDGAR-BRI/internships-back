@@ -41,6 +41,16 @@ test.group('Community', () => {
     assert.isFalse('email' in entry.user)
   })
 
+  test('ranking includes private-profile users too', async ({ client, assert }) => {
+    const res = await client.get('/api/v1/community/ranking').loginAs(userA)
+    res.assertStatus(200)
+    const body: any = res.body()
+    const ranking = body.data?.ranking || body.ranking
+    const privateUser = ranking.find((r: any) => r.user.id === userB.id)
+    assert.exists(privateUser)
+    assert.isFalse('email' in privateUser.user)
+  })
+
   test('public notes include only public users and no email', async ({ client, assert }) => {
     await Note.create({
       userId: userA.id,
@@ -56,6 +66,28 @@ test.group('Community', () => {
     const note = notes.find((n: any) => n.title === 'Nota pública')
     assert.exists(note)
     assert.isFalse('email' in note.user)
+  })
+
+  test('can react to a public note and toggle it off', async ({ client, assert }) => {
+    const note = await Note.query().where('userId', userA.id).firstOrFail()
+    const res = await client
+      .post(`/api/v1/community/notes/${note.id}/reactions`)
+      .loginAs(userA)
+      .json({ emoji: '👍' })
+    res.assertStatus(200)
+    const body: any = res.body()
+    const reactions = body.data?.reactions || body.reactions
+    assert.equal(reactions.length, 1)
+    assert.equal(reactions[0].emoji, '👍')
+    assert.equal(reactions[0].reacted, true)
+
+    const res2 = await client
+      .post(`/api/v1/community/notes/${note.id}/reactions`)
+      .loginAs(userA)
+      .json({ emoji: '👍' })
+    const body2: any = res2.body()
+    const reactions2 = body2.data?.reactions || body2.reactions
+    assert.equal(reactions2.length, 0)
   })
 
   test('can comment on a public note', async ({ client, assert }) => {

@@ -2,6 +2,7 @@ import User from '#models/user'
 import Note from '#models/note'
 import Attendance from '#models/attendance'
 import NoteComment from '#models/note_comment'
+import NoteReaction from '#models/note_reaction'
 import UserSetting from '#models/user_setting'
 import AttendanceProgressService from '#services/attendance_progress_service'
 import type { HttpContext } from '@adonisjs/core/http'
@@ -33,7 +34,7 @@ export default class CommunityController {
       return serialize({ error: denied.message, ranking: [] })
     }
 
-    const users = await User.query().where('profile_public', true).orderBy('fullName', 'asc')
+    const users = await User.query().orderBy('fullName', 'asc')
     const settingsByUser = new Map<number, UserSetting | null>()
     for (const u of users) {
       const s = await UserSetting.query().where('userId', u.id).first()
@@ -113,6 +114,7 @@ export default class CommunityController {
     const notes = await Note.query()
       .whereIn('user_id', publicIds)
       .preload('comments', (q) => q.preload('user').orderBy('created_at', 'asc'))
+      .preload('reactions', (q) => q.preload('user'))
       .orderBy('created_at', 'desc')
       .limit(60)
 
@@ -134,24 +136,63 @@ export default class CommunityController {
         user: this.publicUser(userMap.get(c.userId) ?? c.user),
         mine: c.userId === me.id,
       })),
+      reactions: this.reactionsFor(n.reactions, me.id),
     }))
 
     return serialize({ notes: data })
   }
 
-  async publicProfile({ auth, params, serialize }: HttpContext) {
+  private reactionsFor(reactions: NoteReaction[], meId: number) {
+    const grouped = new Map<string, { emoji: string; count: number; reacted: boolean }>()
+    for (const r of reactions) {
+      const entry = grouped.get(r.emoji) ?? { emoji: r.emoji, count: 0, reacted: false }
+      entry.count++
+      if (r.userId === meId) entry.reacted = true
+      grouped.set(r.emoji, entry)
+    }
+    return Array.from(grouped.values()).sort((a, b) => b.count - a.count)
+  }
+
+  async toggleReaction({ auth, params, request, serialize, response }: HttpContext) {
     const me = auth.getUserOrFail()
     const denied = this.assertPublicAccess(me)
     if (denied.error) {
-      return serialize({ error: denied.message, user: null })
+      return response.badRequest({ message: denied.message })
     }
 
-    const user = await User.query().where('id', params.id).where('profile_public', true).first()
-    if (!user) {
-      return serialize({ user: null })
+    const communityValidator = await import('#validators/community')
+    const { emoji } = await request.validateUsing(communityValidator.reactionValidator)
+
+    const note = await Note.query()
+      .where('id', params.id)
+      .whereIn('user_id', User.query().select('id').where('profile_public', true))
+      .first()
+
+    if (!note) {
+      return response.notFound({ message: 'Nota no encontrada' })
     }
 
-    const settings = await UserSetting.query().where('userId', user.id).first()
+    const existing = await NoteReaction.query()
+      .where('note_id', note.id)
+      .where('user_id', me.id)
+      .where('emoji', emoji)
+      .first()
+
+    if (existing) {
+      await existing.delete()
+    } else {
+      await NoteReaction.create({ noteId: note.id, userId: me.id, emoji })
+    }
+
+    const reactions = await NoteReaction.query().where('note_id', note.id).preload('user')
+    const noteReactions = reactions.filter((r) => r.noteId === note.id)
+
+    return serialize({
+      reactions: this.reactionsFor(noteReactions, me.id),
+    })
+  }
+
+  private async statsFor(user: User, settings: UserSetting | null) {
     const attendances = await Attendance.query().where('user_id', user.id).orderBy('date', 'asc')
     let completedDays = 0
     let completedHours = 0
@@ -166,21 +207,92 @@ export default class CommunityController {
         else onSiteDays += day
       }
     }
+    return {
+      completedDays: Math.round(completedDays * 10) / 10,
+      completedHours: Math.round(completedHours * 10) / 10,
+      onSiteDays: Math.round(onSiteDays * 10) / 10,
+      remoteDays: Math.round(remoteDays * 10) / 10,
+      attendanceCount: attendances.length,
+    }
+  }
+
+  async search({ auth, request, serialize }: HttpContext) {
+    const me = auth.getUserOrFail()
+    const denied = this.assertPublicAccess(me)
+    if (denied.error) {
+      return serialize({ error: denied.message, users: [] })
+    }
+
+    const q = String(request.input('q', '')).trim().slice(0, 100)
+    if (!q) {
+      return serialize({ users: [] })
+    }
+
+    const users = await User.query()
+      .where('full_name', 'like', `%${q}%`)
+      .orWhere('email', 'like', `%${q}%`)
+      .orderBy('fullName', 'asc')
+      .limit(20)
+
+    const results = []
+    for (const u of users) {
+      const base = {
+        id: u.id,
+        fullName: u.fullName,
+        avatarUrl: u.avatarUrl,
+        initials: u.initials,
+        isPrivate: !u.profilePublic,
+      }
+      if (u.profilePublic) {
+        const settings = await UserSetting.query().where('userId', u.id).first()
+        const stats = await this.statsFor(u, settings)
+        const notesCount = await Note.query().where('user_id', u.id).count('* as total')
+        results.push({
+          ...base,
+          isPrivate: false,
+          stats,
+          notesCount: Number(notesCount[0].$extras.total ?? 0),
+        })
+      } else {
+        results.push(base)
+      }
+    }
+
+    return serialize({ users: results })
+  }
+
+  async publicProfile({ auth, params, serialize }: HttpContext) {
+    const me = auth.getUserOrFail()
+    const denied = this.assertPublicAccess(me)
+    if (denied.error) {
+      return serialize({ error: denied.message, user: null })
+    }
+
+    const user = await User.query().where('id', params.id).first()
+    if (!user) {
+      return serialize({ user: null })
+    }
+
+    if (!user.profilePublic) {
+      return serialize({
+        user: this.publicUser(user),
+        isPrivate: true,
+      })
+    }
+
+    const settings = await UserSetting.query().where('userId', user.id).first()
+    const stats = await this.statsFor(user, settings)
 
     const notes = await Note.query()
       .where('user_id', user.id)
       .preload('comments', (q) => q.preload('user').orderBy('created_at', 'asc'))
+      .preload('reactions', (q) => q.preload('user'))
       .orderBy('created_at', 'desc')
       .limit(30)
 
     return serialize({
       user: this.publicUser(user),
-      stats: {
-        completedDays: Math.round(completedDays * 10) / 10,
-        completedHours: Math.round(completedHours * 10) / 10,
-        onSiteDays: Math.round(onSiteDays * 10) / 10,
-        remoteDays: Math.round(remoteDays * 10) / 10,
-      },
+      stats,
       notes: notes.map((n) => ({
         id: n.id,
         title: n.title,
@@ -195,6 +307,7 @@ export default class CommunityController {
           user: this.publicUser(c.user),
           mine: c.userId === me.id,
         })),
+        reactions: this.reactionsFor(n.reactions, me.id),
       })),
     })
   }

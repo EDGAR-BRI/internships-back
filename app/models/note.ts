@@ -4,6 +4,7 @@ import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import User from '#models/user'
 import LogEntry from '#models/log_entry'
 import NoteComment from '#models/note_comment'
+import NoteReaction from '#models/note_reaction'
 
 export default class Note extends BaseModel {
   @column({ isPrimary: true })
@@ -41,4 +42,7 @@ export default class Note extends BaseModel {
 
   @hasMany(() => NoteComment, { foreignKey: 'noteId' })
   declare comments: HasMany<typeof NoteComment>
+
+  @hasMany(() => NoteReaction, { foreignKey: 'noteId' })
+  declare reactions: HasMany<typeof NoteReaction>
 }

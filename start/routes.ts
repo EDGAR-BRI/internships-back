@@ -141,9 +141,11 @@ router
       .group(() => {
         router.get('ranking', [controllers.Community, 'ranking'])
         router.get('notes', [controllers.Community, 'notes'])
+        router.get('search', [controllers.Community, 'search'])
         router.get('users/:id', [controllers.Community, 'publicProfile'])
         router.post('notes/:id/comments', [controllers.Community, 'addComment'])
         router.delete('comments/:id', [controllers.Community, 'deleteComment'])
+        router.post('notes/:id/reactions', [controllers.Community, 'toggleReaction'])
       })
       .prefix('community')
       .as('community')
