@@ -19,16 +19,19 @@ export default class AttendanceProgressService {
     return this.TOTAL_HOURS
   }
 
+  static MAX_HOURS_PER_DAY = 10
+
   static computeDayHours(attendance: Attendance, settings: UserSetting | null): number {
     const fullDayHours = this.getWorkHoursPerDay(settings)
+    const maxHours = Math.max(fullDayHours, this.MAX_HOURS_PER_DAY)
     if (attendance.isFullDay && attendance.checkOut) return fullDayHours
     if (attendance.hours !== null && attendance.hours !== undefined) {
-      return Math.min(attendance.hours, fullDayHours)
+      return Math.min(attendance.hours, maxHours)
     }
     if (!attendance.checkIn || !attendance.checkOut) return 0
     const diffMinutes = attendance.checkOut.diff(attendance.checkIn, 'minutes').minutes
     const hours = diffMinutes / 60
-    return Math.min(hours, fullDayHours)
+    return Math.min(hours, maxHours)
   }
 
   static countCompletedDay(attendance: Attendance, settings: UserSetting | null): number {

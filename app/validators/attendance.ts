@@ -20,7 +20,7 @@ export const fullDayValidator = vine.create({
 
 export const partialValidator = vine.create({
   date: dateRule.use(notInFuture()),
-  hours: vine.number().positive().withoutDecimals().min(1).max(24),
+  hours: vine.number().positive().min(0.5).max(10),
   mode: modeRule,
   checkIn: vine
     .string()
@@ -40,7 +40,7 @@ const timeRule = vine
 export const updateAttendanceValidator = vine.create({
   date: dateRule.use(notInFuture()).optional(),
   isFullDay: vine.boolean().optional(),
-  hours: vine.number().positive().withoutDecimals().min(1).max(24).optional(),
+  hours: vine.number().positive().min(0.5).max(10).optional(),
   mode: modeRule,
   checkIn: timeRule,
   checkOut: timeRule,
