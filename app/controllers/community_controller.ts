@@ -3,6 +3,7 @@ import Note from '#models/note'
 import Attendance from '#models/attendance'
 import NoteComment from '#models/note_comment'
 import NoteReaction from '#models/note_reaction'
+import CommentReaction from '#models/comment_reaction'
 import UserSetting from '#models/user_setting'
 import AttendanceProgressService from '#services/attendance_progress_service'
 import type { HttpContext } from '@adonisjs/core/http'
@@ -100,49 +101,74 @@ export default class CommunityController {
     return serialize({ ranking })
   }
 
-  async notes({ auth, serialize }: HttpContext) {
+  async notes({ auth, request, serialize }: HttpContext) {
     const me = auth.getUserOrFail()
     const denied = this.assertPublicAccess(me)
     if (denied.error) {
       return serialize({ error: denied.message, notes: [] })
     }
 
+    const sort = String(request.input('sort', 'popular'))
     const publicUsers = await User.query().where('profile_public', true)
     const publicIds = publicUsers.map((u) => u.id)
     const userMap = new Map(publicUsers.map((u) => [u.id, u]))
 
     const notes = await Note.query()
       .whereIn('user_id', publicIds)
-      .preload('comments', (q) => q.preload('user').orderBy('created_at', 'asc'))
+      .preload('comments', (q) =>
+        q
+          .preload('user')
+          .preload('reactions', (r) => r.preload('user'))
+          .orderBy('created_at', 'asc')
+      )
       .preload('reactions', (q) => q.preload('user'))
-      .orderBy('created_at', 'desc')
-      .limit(60)
+      .limit(100)
 
-    const data = notes.map((n) => ({
-      id: n.id,
-      title: n.title,
-      content: n.content,
-      tag: n.tag,
-      date: n.date,
-      createdAt: n.createdAt,
-      user:
-        n.userId !== me.id
-          ? this.publicUser(userMap.get(n.userId)!)
-          : { ...this.publicUser(me), mine: true },
-      comments: n.comments.map((c) => ({
-        id: c.id,
-        content: c.content,
-        createdAt: c.createdAt,
-        user: this.publicUser(userMap.get(c.userId) ?? c.user),
-        mine: c.userId === me.id,
-      })),
-      reactions: this.reactionsFor(n.reactions, me.id),
-    }))
+    const now = Date.now()
+    const data = notes.map((n) => {
+      const created = new Date(n.createdAt.toISO()!).getTime()
+      const ageHours = Math.max((now - created) / 3600000, 0.1)
+      const reactionCount = n.reactions.length
+      const commentCount = n.comments.length
+      const commentReactions = n.comments.reduce((s, c) => s + c.reactions.length, 0)
+      // Algoritmo estilo Hacker News: popularidad = interacciones / edad^1.5
+      const popularity =
+        ((reactionCount * 3 + commentCount * 2 + commentReactions) / Math.pow(ageHours, 1.5)) * 100
+
+      return {
+        id: n.id,
+        title: n.title,
+        content: n.content,
+        tag: n.tag,
+        date: n.date,
+        createdAt: n.createdAt,
+        popularity: Math.round(popularity * 100) / 100,
+        user:
+          n.userId !== me.id
+            ? this.publicUser(userMap.get(n.userId)!)
+            : { ...this.publicUser(me), mine: true },
+        comments: n.comments.map((c) => ({
+          id: c.id,
+          content: c.content,
+          createdAt: c.createdAt,
+          user: this.publicUser(userMap.get(c.userId) ?? c.user),
+          mine: c.userId === me.id,
+          reactions: this.reactionsFor(c.reactions, me.id),
+        })),
+        reactions: this.reactionsFor(n.reactions, me.id),
+      }
+    })
+
+    if (sort === 'recent') {
+      data.sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))
+    } else {
+      data.sort((a, b) => b.popularity - a.popularity)
+    }
 
     return serialize({ notes: data })
   }
 
-  private reactionsFor(reactions: NoteReaction[], meId: number) {
+  private reactionsFor(reactions: Array<NoteReaction | CommentReaction>, meId: number) {
     const grouped = new Map<string, { emoji: string; count: number; reacted: boolean }>()
     for (const r of reactions) {
       const entry = grouped.get(r.emoji) ?? { emoji: r.emoji, count: 0, reacted: false }
@@ -189,6 +215,50 @@ export default class CommunityController {
 
     return serialize({
       reactions: this.reactionsFor(noteReactions, me.id),
+    })
+  }
+
+  async toggleCommentReaction({ auth, params, request, serialize, response }: HttpContext) {
+    const me = auth.getUserOrFail()
+    const denied = this.assertPublicAccess(me)
+    if (denied.error) {
+      return response.badRequest({ message: denied.message })
+    }
+
+    const communityValidator = await import('#validators/community')
+    const { emoji } = await request.validateUsing(communityValidator.reactionValidator)
+
+    const comment = await NoteComment.query()
+      .where('id', params.id)
+      .whereIn(
+        'note_id',
+        Note.query()
+          .select('id')
+          .whereIn('user_id', User.query().select('id').where('profile_public', true))
+      )
+      .first()
+
+    if (!comment) {
+      return response.notFound({ message: 'Comentario no encontrado' })
+    }
+
+    const existing = await CommentReaction.query()
+      .where('comment_id', comment.id)
+      .where('user_id', me.id)
+      .where('emoji', emoji)
+      .first()
+
+    if (existing) {
+      await existing.delete()
+    } else {
+      await CommentReaction.create({ commentId: comment.id, userId: me.id, emoji })
+    }
+
+    const reactions = await CommentReaction.query().where('comment_id', comment.id).preload('user')
+    const commentReactions = reactions.filter((r) => r.commentId === comment.id)
+
+    return serialize({
+      reactions: this.reactionsFor(commentReactions, me.id),
     })
   }
 
@@ -285,7 +355,12 @@ export default class CommunityController {
 
     const notes = await Note.query()
       .where('user_id', user.id)
-      .preload('comments', (q) => q.preload('user').orderBy('created_at', 'asc'))
+      .preload('comments', (q) =>
+        q
+          .preload('user')
+          .preload('reactions', (r) => r.preload('user'))
+          .orderBy('created_at', 'asc')
+      )
       .preload('reactions', (q) => q.preload('user'))
       .orderBy('created_at', 'desc')
       .limit(30)
@@ -306,6 +381,7 @@ export default class CommunityController {
           createdAt: c.createdAt,
           user: this.publicUser(c.user),
           mine: c.userId === me.id,
+          reactions: this.reactionsFor(c.reactions, me.id),
         })),
         reactions: this.reactionsFor(n.reactions, me.id),
       })),

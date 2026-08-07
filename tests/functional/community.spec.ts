@@ -103,6 +103,35 @@ test.group('Community', () => {
     assert.isFalse('email' in comment.user)
   })
 
+  test('can react to a comment', async ({ client, assert }) => {
+    const comment = await import('#models/note_comment').then((m) =>
+      m.default.query().where('userId', userA.id).firstOrFail()
+    )
+    const res = await client
+      .post(`/api/v1/community/comments/${comment.id}/reactions`)
+      .loginAs(userA)
+      .json({ emoji: '🔥' })
+    res.assertStatus(200)
+    const body: any = res.body()
+    const reactions = body.data?.reactions || body.reactions
+    assert.equal(reactions.length, 1)
+    assert.equal(reactions[0].emoji, '🔥')
+    assert.equal(reactions[0].reacted, true)
+  })
+
+  test('feed notes include comment reactions', async ({ client, assert }) => {
+    const res = await client.get('/api/v1/community/notes?sort=popular').loginAs(userA)
+    res.assertStatus(200)
+    const body: any = res.body()
+    const notes = body.data?.notes || body.notes
+    assert.exists(notes)
+    const note = notes.find((n: any) => n.title === 'Nota pública')
+    assert.exists(note)
+    assert.isTrue(Array.isArray(note.reactions))
+    assert.isTrue(Array.isArray(note.comments[0].reactions))
+    assert.exists(note.popularity)
+  })
+
   test('cleanup', async () => {
     const notes = await Note.query().whereIn('userId', [userA.id, userB.id])
     for (const n of notes) await n.delete()

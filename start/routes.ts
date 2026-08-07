@@ -146,6 +146,7 @@ router
         router.post('notes/:id/comments', [controllers.Community, 'addComment'])
         router.delete('comments/:id', [controllers.Community, 'deleteComment'])
         router.post('notes/:id/reactions', [controllers.Community, 'toggleReaction'])
+        router.post('comments/:id/reactions', [controllers.Community, 'toggleCommentReaction'])
       })
       .prefix('community')
       .as('community')
