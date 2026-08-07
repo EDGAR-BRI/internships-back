@@ -1,24 +1,25 @@
 import vine from '@vinejs/vine'
+import { dateRule, notInFuture } from '#validators/date_rules'
 
 const modeRule = vine.enum(['on_site', 'remote']).optional()
 
 export const checkInValidator = vine.create({
-  date: vine.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  date: dateRule.use(notInFuture()),
   isFullDay: vine.boolean().optional(),
   mode: modeRule,
 })
 
 export const checkOutValidator = vine.create({
-  date: vine.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  date: dateRule.use(notInFuture()),
 })
 
 export const fullDayValidator = vine.create({
-  date: vine.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  date: dateRule.use(notInFuture()),
   mode: modeRule,
 })
 
 export const partialValidator = vine.create({
-  date: vine.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  date: dateRule.use(notInFuture()),
   hours: vine.number().positive().withoutDecimals().min(1).max(24),
   mode: modeRule,
   checkIn: vine
@@ -37,10 +38,7 @@ const timeRule = vine
   .optional()
 
 export const updateAttendanceValidator = vine.create({
-  date: vine
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/)
-    .optional(),
+  date: dateRule.use(notInFuture()).optional(),
   isFullDay: vine.boolean().optional(),
   hours: vine.number().positive().withoutDecimals().min(1).max(24).optional(),
   mode: modeRule,
