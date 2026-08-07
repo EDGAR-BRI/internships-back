@@ -16,7 +16,10 @@ export default class UserSetting extends BaseModel {
   @column.dateTime()
   declare endDate: DateTime
 
-  @column()
+  @column({
+    prepare: (value: number[] | null) => (value ? JSON.stringify(value) : value),
+    consume: (value: string | null) => (value ? JSON.parse(value) : value),
+  })
   declare skippedWeeks: number[] | null
 
   @column()
