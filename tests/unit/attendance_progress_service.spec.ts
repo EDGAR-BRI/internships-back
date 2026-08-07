@@ -17,6 +17,16 @@ test.group('AttendanceProgressService', () => {
     assert.equal(AttendanceProgressService.countCompletedDay(attendance, null), 0.25)
   })
 
+  test('countCompletedDay: 10h = 1.25 días (más de la jornada)', async ({ assert }) => {
+    const attendance = { isFullDay: false, hours: 10, checkIn: null, checkOut: null } as any
+    assert.equal(AttendanceProgressService.countCompletedDay(attendance, null), 1.25)
+  })
+
+  test('countCompletedDay: 9h = 1.125 días', async ({ assert }) => {
+    const attendance = { isFullDay: false, hours: 9, checkIn: null, checkOut: null } as any
+    assert.equal(AttendanceProgressService.countCompletedDay(attendance, null), 1.125)
+  })
+
   test('countCompletedDay: jornada completa cuenta 1', async ({ assert }) => {
     const attendance = {
       isFullDay: true,

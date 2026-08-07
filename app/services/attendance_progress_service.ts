@@ -38,7 +38,7 @@ export default class AttendanceProgressService {
     if (attendance.isFullDay && attendance.checkOut) return 1
     const fullDayHours = this.getWorkHoursPerDay(settings)
     if (attendance.hours !== null && attendance.hours !== undefined && attendance.hours > 0) {
-      return Math.min(attendance.hours, fullDayHours) / fullDayHours
+      return Math.min(attendance.hours, this.MAX_HOURS_PER_DAY) / fullDayHours
     }
     return 0
   }
