@@ -15,4 +15,5 @@ export const updateSettingsValidator = vine.create({
   daysPerWeek: vine.number().positive().withoutDecimals().min(1).max(7).optional(),
   workStartTime: timeFormat.optional(),
   workEndTime: timeFormat.optional(),
+  geminiApiKey: vine.string().minLength(1).optional(),
 })

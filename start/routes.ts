@@ -103,6 +103,14 @@ router
 
     router
       .group(() => {
+        router.post('suggest', [controllers.AiSuggest, 'store'])
+      })
+      .prefix('ai')
+      .as('ai')
+      .use(middleware.auth())
+
+    router
+      .group(() => {
         router.get('users', [controllers.AdminUsers, 'index'])
         router.get('summary', [controllers.AdminUsers, 'summary'])
         router.get('users/:id', [controllers.AdminUsers, 'show'])

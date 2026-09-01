@@ -41,6 +41,9 @@ export default await Env.create(new URL('../', import.meta.url), {
   FRONTEND_URL: Env.schema.string.optional(),
   GOOGLE_CALLBACK_URL: Env.schema.string.optional(),
 
+  // IA
+  GEMINI_MODEL: Env.schema.string.optional(),
+
   /*
   |----------------------------------------------------------
   | Cache (Upstash Redis opcional)

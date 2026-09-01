@@ -3,6 +3,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { updateSettingsValidator } from '#validators/user_setting'
 import UserSettingTransformer from '#transformers/user_setting_transformer'
 import CacheService from '#services/cache_service'
+import encryption from '@adonisjs/core/services/encryption'
 
 export default class SettingsController {
   async show({ auth, serialize }: HttpContext) {
@@ -31,6 +32,11 @@ export default class SettingsController {
     const user = auth.getUserOrFail()
     const data = await request.validateUsing(updateSettingsValidator)
 
+    let geminiApiKey: string | null | undefined
+    if (data.geminiApiKey !== undefined) {
+      geminiApiKey = data.geminiApiKey.trim() ? encryption.encrypt(data.geminiApiKey.trim()) : null
+    }
+
     const payload: Record<string, unknown> = {
       startDate: data.startDate,
       endDate: data.endDate,
@@ -40,6 +46,7 @@ export default class SettingsController {
       daysPerWeek: data.daysPerWeek ?? null,
       workStartTime: data.workStartTime ?? null,
       workEndTime: data.workEndTime ?? null,
+      geminiApiKey,
     }
     if (data.ci !== undefined) {
       payload.ci = data.ci
