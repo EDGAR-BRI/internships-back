@@ -8,6 +8,7 @@ export default class UserSettingTransformer extends BaseTransformer<UserSetting>
       'userId',
       'startDate',
       'endDate',
+      'ci',
       'skippedWeeks',
       'workType',
       'workHoursPerDay',

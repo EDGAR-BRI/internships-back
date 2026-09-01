@@ -31,19 +31,21 @@ export default class SettingsController {
     const user = auth.getUserOrFail()
     const data = await request.validateUsing(updateSettingsValidator)
 
-    const settings = await UserSetting.updateOrCreate(
-      { userId: user.id },
-      {
-        startDate: data.startDate,
-        endDate: data.endDate,
-        skippedWeeks: data.skippedWeeks ?? null,
-        workType: data.workType ?? null,
-        workHoursPerDay: data.workHoursPerDay ?? null,
-        daysPerWeek: data.daysPerWeek ?? null,
-        workStartTime: data.workStartTime ?? null,
-        workEndTime: data.workEndTime ?? null,
-      }
-    )
+    const payload: Record<string, unknown> = {
+      startDate: data.startDate,
+      endDate: data.endDate,
+      skippedWeeks: data.skippedWeeks ?? null,
+      workType: data.workType ?? null,
+      workHoursPerDay: data.workHoursPerDay ?? null,
+      daysPerWeek: data.daysPerWeek ?? null,
+      workStartTime: data.workStartTime ?? null,
+      workEndTime: data.workEndTime ?? null,
+    }
+    if (data.ci !== undefined) {
+      payload.ci = data.ci
+    }
+
+    const settings = await UserSetting.updateOrCreate({ userId: user.id }, payload)
 
     await CacheService.invalidateUser(user.id)
 

@@ -7,6 +7,7 @@ const timeFormat = vine.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/)
 export const updateSettingsValidator = vine.create({
   startDate: vine.date(dateFormats),
   endDate: vine.date(dateFormats).afterField('startDate'),
+  ci: vine.string().trim().maxLength(50).optional(),
   skippedWeeks: vine.array(vine.number().positive().withoutDecimals()).optional(),
   workType: vine.enum(['full', 'partial']).optional(),
   workHoursPerDay: vine.number().positive().min(0.5).max(10).optional(),

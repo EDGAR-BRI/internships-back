@@ -23,6 +23,9 @@ export default class UserSetting extends BaseModel {
   declare skippedWeeks: number[] | null
 
   @column()
+  declare ci: string | null
+
+  @column()
   declare workType: 'full' | 'partial' | null
 
   @column()
