@@ -54,6 +54,11 @@ export interface ApiDefinition {
       destroy: typeof routes['notes.notes.destroy']
     }
   }
+  ai: {
+    aiSuggest: {
+      store: typeof routes['ai.ai_suggest.store']
+    }
+  }
   admin: {
     adminUsers: {
       index: typeof routes['admin.admin_users.index']
@@ -85,6 +90,18 @@ export interface ApiDefinition {
       partial: typeof routes['attendances.attendances.partial']
       update: typeof routes['attendances.attendances.update']
       destroy: typeof routes['attendances.attendances.destroy']
+    }
+  }
+  community: {
+    community: {
+      ranking: typeof routes['community.community.ranking']
+      notes: typeof routes['community.community.notes']
+      search: typeof routes['community.community.search']
+      publicProfile: typeof routes['community.community.public_profile']
+      addComment: typeof routes['community.community.add_comment']
+      deleteComment: typeof routes['community.community.delete_comment']
+      toggleReaction: typeof routes['community.community.toggle_reaction']
+      toggleCommentReaction: typeof routes['community.community.toggle_comment_reaction']
     }
   }
 }

@@ -271,6 +271,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/notes_controller').default['destroy']>>>
     }
   }
+  'ai.ai_suggest.store': {
+    methods: ["POST"]
+    pattern: '/api/v1/ai/suggest'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/ai_suggest').aiSuggestValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/ai_suggest').aiSuggestValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/ai_suggest_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/ai_suggest_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
   'admin.admin_users.index': {
     methods: ["GET","HEAD"]
     pattern: '/api/v1/admin/users'
@@ -521,6 +533,102 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/attendances_controller').default['destroy']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/attendances_controller').default['destroy']>>>
+    }
+  }
+  'community.community.ranking': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/community/ranking'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/community_controller').default['ranking']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/community_controller').default['ranking']>>>
+    }
+  }
+  'community.community.notes': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/community/notes'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/community_controller').default['notes']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/community_controller').default['notes']>>>
+    }
+  }
+  'community.community.search': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/community/search'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/community_controller').default['search']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/community_controller').default['search']>>>
+    }
+  }
+  'community.community.public_profile': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/community/users/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/community_controller').default['publicProfile']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/community_controller').default['publicProfile']>>>
+    }
+  }
+  'community.community.add_comment': {
+    methods: ["POST"]
+    pattern: '/api/v1/community/notes/:id/comments'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/community_controller').default['addComment']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/community_controller').default['addComment']>>>
+    }
+  }
+  'community.community.delete_comment': {
+    methods: ["DELETE"]
+    pattern: '/api/v1/community/comments/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/community_controller').default['deleteComment']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/community_controller').default['deleteComment']>>>
+    }
+  }
+  'community.community.toggle_reaction': {
+    methods: ["POST"]
+    pattern: '/api/v1/community/notes/:id/reactions'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/community_controller').default['toggleReaction']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/community_controller').default['toggleReaction']>>>
+    }
+  }
+  'community.community.toggle_comment_reaction': {
+    methods: ["POST"]
+    pattern: '/api/v1/community/comments/:id/reactions'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/community_controller').default['toggleCommentReaction']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/community_controller').default['toggleCommentReaction']>>>
     }
   }
 }

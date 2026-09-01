@@ -138,6 +138,12 @@ const routes = {
     tokens: [{"old":"/api/v1/notes/:id","type":0,"val":"api","end":""},{"old":"/api/v1/notes/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/notes/:id","type":0,"val":"notes","end":""},{"old":"/api/v1/notes/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['notes.notes.destroy']['types'],
   },
+  'ai.ai_suggest.store': {
+    methods: ["POST"],
+    pattern: '/api/v1/ai/suggest',
+    tokens: [{"old":"/api/v1/ai/suggest","type":0,"val":"api","end":""},{"old":"/api/v1/ai/suggest","type":0,"val":"v1","end":""},{"old":"/api/v1/ai/suggest","type":0,"val":"ai","end":""},{"old":"/api/v1/ai/suggest","type":0,"val":"suggest","end":""}],
+    types: placeholder as Registry['ai.ai_suggest.store']['types'],
+  },
   'admin.admin_users.index': {
     methods: ["GET","HEAD"],
     pattern: '/api/v1/admin/users',
@@ -263,6 +269,54 @@ const routes = {
     pattern: '/api/v1/attendances/:id',
     tokens: [{"old":"/api/v1/attendances/:id","type":0,"val":"api","end":""},{"old":"/api/v1/attendances/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/attendances/:id","type":0,"val":"attendances","end":""},{"old":"/api/v1/attendances/:id","type":1,"val":"id","end":""}],
     types: placeholder as Registry['attendances.attendances.destroy']['types'],
+  },
+  'community.community.ranking': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/community/ranking',
+    tokens: [{"old":"/api/v1/community/ranking","type":0,"val":"api","end":""},{"old":"/api/v1/community/ranking","type":0,"val":"v1","end":""},{"old":"/api/v1/community/ranking","type":0,"val":"community","end":""},{"old":"/api/v1/community/ranking","type":0,"val":"ranking","end":""}],
+    types: placeholder as Registry['community.community.ranking']['types'],
+  },
+  'community.community.notes': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/community/notes',
+    tokens: [{"old":"/api/v1/community/notes","type":0,"val":"api","end":""},{"old":"/api/v1/community/notes","type":0,"val":"v1","end":""},{"old":"/api/v1/community/notes","type":0,"val":"community","end":""},{"old":"/api/v1/community/notes","type":0,"val":"notes","end":""}],
+    types: placeholder as Registry['community.community.notes']['types'],
+  },
+  'community.community.search': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/community/search',
+    tokens: [{"old":"/api/v1/community/search","type":0,"val":"api","end":""},{"old":"/api/v1/community/search","type":0,"val":"v1","end":""},{"old":"/api/v1/community/search","type":0,"val":"community","end":""},{"old":"/api/v1/community/search","type":0,"val":"search","end":""}],
+    types: placeholder as Registry['community.community.search']['types'],
+  },
+  'community.community.public_profile': {
+    methods: ["GET","HEAD"],
+    pattern: '/api/v1/community/users/:id',
+    tokens: [{"old":"/api/v1/community/users/:id","type":0,"val":"api","end":""},{"old":"/api/v1/community/users/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/community/users/:id","type":0,"val":"community","end":""},{"old":"/api/v1/community/users/:id","type":0,"val":"users","end":""},{"old":"/api/v1/community/users/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['community.community.public_profile']['types'],
+  },
+  'community.community.add_comment': {
+    methods: ["POST"],
+    pattern: '/api/v1/community/notes/:id/comments',
+    tokens: [{"old":"/api/v1/community/notes/:id/comments","type":0,"val":"api","end":""},{"old":"/api/v1/community/notes/:id/comments","type":0,"val":"v1","end":""},{"old":"/api/v1/community/notes/:id/comments","type":0,"val":"community","end":""},{"old":"/api/v1/community/notes/:id/comments","type":0,"val":"notes","end":""},{"old":"/api/v1/community/notes/:id/comments","type":1,"val":"id","end":""},{"old":"/api/v1/community/notes/:id/comments","type":0,"val":"comments","end":""}],
+    types: placeholder as Registry['community.community.add_comment']['types'],
+  },
+  'community.community.delete_comment': {
+    methods: ["DELETE"],
+    pattern: '/api/v1/community/comments/:id',
+    tokens: [{"old":"/api/v1/community/comments/:id","type":0,"val":"api","end":""},{"old":"/api/v1/community/comments/:id","type":0,"val":"v1","end":""},{"old":"/api/v1/community/comments/:id","type":0,"val":"community","end":""},{"old":"/api/v1/community/comments/:id","type":0,"val":"comments","end":""},{"old":"/api/v1/community/comments/:id","type":1,"val":"id","end":""}],
+    types: placeholder as Registry['community.community.delete_comment']['types'],
+  },
+  'community.community.toggle_reaction': {
+    methods: ["POST"],
+    pattern: '/api/v1/community/notes/:id/reactions',
+    tokens: [{"old":"/api/v1/community/notes/:id/reactions","type":0,"val":"api","end":""},{"old":"/api/v1/community/notes/:id/reactions","type":0,"val":"v1","end":""},{"old":"/api/v1/community/notes/:id/reactions","type":0,"val":"community","end":""},{"old":"/api/v1/community/notes/:id/reactions","type":0,"val":"notes","end":""},{"old":"/api/v1/community/notes/:id/reactions","type":1,"val":"id","end":""},{"old":"/api/v1/community/notes/:id/reactions","type":0,"val":"reactions","end":""}],
+    types: placeholder as Registry['community.community.toggle_reaction']['types'],
+  },
+  'community.community.toggle_comment_reaction': {
+    methods: ["POST"],
+    pattern: '/api/v1/community/comments/:id/reactions',
+    tokens: [{"old":"/api/v1/community/comments/:id/reactions","type":0,"val":"api","end":""},{"old":"/api/v1/community/comments/:id/reactions","type":0,"val":"v1","end":""},{"old":"/api/v1/community/comments/:id/reactions","type":0,"val":"community","end":""},{"old":"/api/v1/community/comments/:id/reactions","type":0,"val":"comments","end":""},{"old":"/api/v1/community/comments/:id/reactions","type":1,"val":"id","end":""},{"old":"/api/v1/community/comments/:id/reactions","type":0,"val":"reactions","end":""}],
+    types: placeholder as Registry['community.community.toggle_comment_reaction']['types'],
   },
 } as const satisfies Record<string, AdonisEndpoint>
 
