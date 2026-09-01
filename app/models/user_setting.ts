@@ -26,6 +26,9 @@ export default class UserSetting extends BaseModel {
   declare ci: string | null
 
   @column()
+  declare tutorName: string | null
+
+  @column()
   declare workType: 'full' | 'partial' | null
 
   @column()

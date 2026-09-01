@@ -44,6 +44,9 @@ export default class SettingsController {
     if (data.ci !== undefined) {
       payload.ci = data.ci
     }
+    if (data.tutorName !== undefined) {
+      payload.tutorName = data.tutorName
+    }
 
     const settings = await UserSetting.updateOrCreate({ userId: user.id }, payload)
 
