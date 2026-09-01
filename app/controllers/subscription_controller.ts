@@ -21,7 +21,9 @@ export default class SubscriptionController {
       subscription: {
         planSlug: plan.slug,
         planName: plan.name,
-        canExport: user.isAdmin || plan.canExport,
+        canExport: user.isAdmin || !!plan.canExport,
+        canExportAttendance: user.isAdmin || !!plan.canExportAttendance,
+        canUseAi: user.isAdmin || !!plan.canUseAi,
         expiresAt: sub?.expiresAt ?? null,
       },
     }

@@ -15,6 +15,7 @@ export const createPlanValidator = vine.create({
   attendancesPerDay: nullableNumber(),
   attendancesPerDayFirstDay: nullableNumber(),
   canExport: vine.boolean().optional(),
+  canExportAttendance: vine.boolean().optional(),
   isDefault: vine.boolean().optional(),
 })
 
@@ -25,5 +26,6 @@ export const updatePlanValidator = vine.create({
   attendancesPerDay: nullableNumber(),
   attendancesPerDayFirstDay: nullableNumber(),
   canExport: vine.boolean().optional(),
+  canExportAttendance: vine.boolean().optional(),
   isDefault: vine.boolean().optional(),
 })

@@ -29,6 +29,12 @@ export default class Plan extends BaseModel {
   declare canExport: boolean
 
   @column()
+  declare canExportAttendance: boolean
+
+  @column()
+  declare canUseAi: boolean
+
+  @column()
   declare isDefault: boolean
 
   @column.dateTime({ autoCreate: true })

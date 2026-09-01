@@ -13,6 +13,7 @@ function serializePlan(plan: Plan) {
     attendancesPerDay: plan.attendancesPerDay,
     attendancesPerDayFirstDay: plan.attendancesPerDayFirstDay,
     canExport: plan.canExport,
+    canExportAttendance: plan.canExportAttendance,
     isDefault: plan.isDefault,
   }
 }
@@ -45,6 +46,7 @@ export default class AdminPlansController {
       attendancesPerDay: payload.attendancesPerDay ?? null,
       attendancesPerDayFirstDay: payload.attendancesPerDayFirstDay ?? null,
       canExport: payload.canExport ?? true,
+      canExportAttendance: payload.canExportAttendance ?? true,
       isDefault: isDefault || Number(totalPlans[0]?.$extras.total) === 0,
     })
 
@@ -67,9 +69,7 @@ export default class AdminPlansController {
       name: payload.name !== undefined ? payload.name : plan.name,
       notesPerDay: payload.notesPerDay !== undefined ? payload.notesPerDay : plan.notesPerDay,
       logEntriesPerDay:
-        payload.logEntriesPerDay !== undefined
-          ? payload.logEntriesPerDay
-          : plan.logEntriesPerDay,
+        payload.logEntriesPerDay !== undefined ? payload.logEntriesPerDay : plan.logEntriesPerDay,
       attendancesPerDay:
         payload.attendancesPerDay !== undefined
           ? payload.attendancesPerDay
@@ -79,6 +79,10 @@ export default class AdminPlansController {
           ? payload.attendancesPerDayFirstDay
           : plan.attendancesPerDayFirstDay,
       canExport: payload.canExport !== undefined ? payload.canExport : plan.canExport,
+      canExportAttendance:
+        payload.canExportAttendance !== undefined
+          ? payload.canExportAttendance
+          : plan.canExportAttendance,
       isDefault: payload.isDefault !== undefined ? payload.isDefault : plan.isDefault,
     })
     await plan.save()
