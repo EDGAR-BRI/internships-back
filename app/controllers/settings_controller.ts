@@ -46,6 +46,8 @@ export default class SettingsController {
       daysPerWeek: data.daysPerWeek ?? null,
       workStartTime: data.workStartTime ?? null,
       workEndTime: data.workEndTime ?? null,
+      workMorningEndTime: data.workMorningEndTime ?? null,
+      workAfternoonStartTime: data.workAfternoonStartTime ?? null,
       geminiApiKey,
     }
     if (data.ci !== undefined) {

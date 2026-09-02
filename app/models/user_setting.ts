@@ -44,6 +44,12 @@ export default class UserSetting extends BaseModel {
   declare workEndTime: string | null
 
   @column()
+  declare workMorningEndTime: string | null
+
+  @column()
+  declare workAfternoonStartTime: string | null
+
+  @column()
   declare geminiApiKey: string | null
 
   @column.dateTime({ autoCreate: true })
