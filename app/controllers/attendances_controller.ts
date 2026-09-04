@@ -3,6 +3,7 @@ import UserSetting from '#models/user_setting'
 import AttendanceProgressService from '#services/attendance_progress_service'
 import SubscriptionService from '#services/subscription_service'
 import {
+  bulkValidator,
   checkInValidator,
   checkOutValidator,
   fullDayValidator,
@@ -206,6 +207,82 @@ export default class AttendancesController {
     return serialize({
       ...attendance.serialize(),
       hours: AttendanceProgressService.computeDayHours(attendance, settings),
+    })
+  }
+
+  async bulk({ auth, request, serialize, response }: HttpContext) {
+    const user = auth.getUserOrFail()
+    const { dates, isFullDay, hours, mode, checkIn, checkOut } =
+      await request.validateUsing(bulkValidator)
+    const uniqueDates = Array.from(new Set(dates))
+    const dateObjs = uniqueDates.map((d) =>
+      DateTime.fromISO(d, { zone: 'America/Mexico_City' }).startOf('day')
+    )
+
+    const dateStrs = dateObjs.map((d) => d.toSQLDate()!)
+    const existing = await Attendance.query()
+      .where('user_id', user.id)
+      .whereIn('date', dateStrs)
+      .select('date')
+    const existingDates = new Set(existing.map((a) => a.date.toSQLDate()))
+    const toCreate = dateObjs.filter((d) => !existingDates.has(d.toSQLDate()))
+
+    if (toCreate.length === 0) {
+      return serialize({ created: 0, skipped: uniqueDates.length, attendances: [] })
+    }
+
+    const limit = await SubscriptionService.getDailyLimit(user, 'attendances')
+    if (limit !== null) {
+      const used = await SubscriptionService.countCreatedToday(user.id, 'attendances')
+      if (used + toCreate.length > limit) {
+        const plan = await SubscriptionService.getPlanFor(user.id)
+        return response.tooManyRequests({
+          message: SubscriptionService.limitMessage(plan.name, 'asistencias', limit),
+          code: 'DAILY_LIMIT',
+          resource: 'attendances',
+          used,
+          limit,
+        })
+      }
+    }
+
+    const created: Attendance[] = []
+    for (const dateObj of toCreate) {
+      const attendance = new Attendance()
+      attendance.userId = user.id
+      attendance.date = dateObj
+      if (isFullDay !== undefined) attendance.isFullDay = isFullDay
+      if (hours !== undefined) {
+        attendance.hours = hours
+        attendance.isFullDay = false
+      }
+      attendance.mode = mode ?? null
+      if (checkIn) {
+        attendance.checkIn = DateTime.fromISO(`${dateObj.toISODate()}T${checkIn}:00`, {
+          zone: 'America/Mexico_City',
+        })
+      }
+      if (checkOut) {
+        attendance.checkOut = DateTime.fromISO(`${dateObj.toISODate()}T${checkOut}:00`, {
+          zone: 'America/Mexico_City',
+        })
+      }
+      await attendance.save()
+      created.push(attendance)
+    }
+
+    await CacheService.invalidateUser(user.id)
+
+    const settings = await UserSetting.query().where('userId', user.id).first()
+    const attendances = created.map((a) => ({
+      ...a.serialize(),
+      hours: AttendanceProgressService.computeDayHours(a, settings),
+    }))
+
+    return serialize({
+      created: created.length,
+      skipped: uniqueDates.length - created.length,
+      attendances,
     })
   }
 

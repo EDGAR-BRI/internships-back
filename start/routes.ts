@@ -138,6 +138,7 @@ router
         router.post('check-out', [controllers.Attendances, 'checkOut'])
         router.post('full-day', [controllers.Attendances, 'fullDay'])
         router.post('partial', [controllers.Attendances, 'partial'])
+        router.post('bulk', [controllers.Attendances, 'bulk'])
         router.put(':id', [controllers.Attendances, 'update'])
         router.delete(':id', [controllers.Attendances, 'destroy'])
       })
